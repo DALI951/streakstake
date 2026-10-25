@@ -70,8 +70,10 @@ class MainActivity : AppCompatActivity() {
         currentUser?.let { user ->
             binding.tvUserName.text = user.name
             binding.tvUserHandle.text = if (user.username.isNotEmpty()) user.username else "@" + user.name.lowercase().replace(" ", "_")
+            binding.tvAvatarInitial.text = user.name.take(1).uppercase()
             binding.tvXpBalance.text = "${user.totalXp} XP"
             binding.tvStreakCount.text = "${user.currentStreak} Days"
+            binding.tvCompletedCount.text = "${user.challengesCompleted} Won"
         }
     }
 
@@ -90,13 +92,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateTabStyles() {
-        val orange = ContextCompat.getColor(this, R.color.brand_orange)
-        val gray = ContextCompat.getColor(this, R.color.text_gray)
+        val accent = ContextCompat.getColor(this, R.color.accent_light)
+        val muted = ContextCompat.getColor(this, R.color.text_secondary)
 
-        binding.tabStakesText.setTextColor(if (currentTab == 0) orange else gray)
-        binding.tabVerifyText.setTextColor(if (currentTab == 1) orange else gray)
-        binding.tabFeedText.setTextColor(if (currentTab == 2) orange else gray)
-        binding.tabLeaderboardText.setTextColor(if (currentTab == 3) orange else gray)
+        binding.tabStakesText.setTextColor(if (currentTab == 0) accent else muted)
+        binding.tabVerifyText.setTextColor(if (currentTab == 1) accent else muted)
+        binding.tabFeedText.setTextColor(if (currentTab == 2) accent else muted)
+        binding.tabLeaderboardText.setTextColor(if (currentTab == 3) accent else muted)
 
         binding.tabStakesView.visibility = if (currentTab == 0) View.VISIBLE else View.GONE
         binding.tabVerifyView.visibility = if (currentTab == 1) View.VISIBLE else View.GONE
@@ -129,14 +131,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateDistanceButtons() {
-        binding.btnDist250.setBackgroundResource(if (selectedMeters == 250) R.drawable.btn_orange_rounded else R.drawable.bg_input_field)
-        binding.btnDist250.setTextColor(ContextCompat.getColor(this, if (selectedMeters == 250) R.color.bg_black else R.color.text_white))
+        binding.btnDist250.setBackgroundResource(if (selectedMeters == 250) R.drawable.bg_pill_chip_active else R.drawable.bg_pill_chip)
+        binding.btnDist250.setTextColor(ContextCompat.getColor(this, if (selectedMeters == 250) R.color.on_accent else R.color.text_primary))
 
-        binding.btnDist500.setBackgroundResource(if (selectedMeters == 500) R.drawable.btn_orange_rounded else R.drawable.bg_input_field)
-        binding.btnDist500.setTextColor(ContextCompat.getColor(this, if (selectedMeters == 500) R.color.bg_black else R.color.text_white))
+        binding.btnDist500.setBackgroundResource(if (selectedMeters == 500) R.drawable.bg_pill_chip_active else R.drawable.bg_pill_chip)
+        binding.btnDist500.setTextColor(ContextCompat.getColor(this, if (selectedMeters == 500) R.color.on_accent else R.color.text_primary))
 
-        binding.btnDist1000.setBackgroundResource(if (selectedMeters == 1000) R.drawable.btn_orange_rounded else R.drawable.bg_input_field)
-        binding.btnDist1000.setTextColor(ContextCompat.getColor(this, if (selectedMeters == 1000) R.color.bg_black else R.color.text_white))
+        binding.btnDist1000.setBackgroundResource(if (selectedMeters == 1000) R.drawable.bg_pill_chip_active else R.drawable.bg_pill_chip)
+        binding.btnDist1000.setTextColor(ContextCompat.getColor(this, if (selectedMeters == 1000) R.color.on_accent else R.color.text_primary))
     }
 
     private fun setupStakeSelector() {
@@ -155,14 +157,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateStakeButtons() {
-        binding.btnStake50.setBackgroundResource(if (selectedStakeXp == 50) R.drawable.btn_orange_rounded else R.drawable.bg_input_field)
-        binding.btnStake50.setTextColor(ContextCompat.getColor(this, if (selectedStakeXp == 50) R.color.bg_black else R.color.text_white))
+        binding.btnStake50.setBackgroundResource(if (selectedStakeXp == 50) R.drawable.bg_pill_chip_active else R.drawable.bg_pill_chip)
+        binding.btnStake50.setTextColor(ContextCompat.getColor(this, if (selectedStakeXp == 50) R.color.on_accent else R.color.text_primary))
 
-        binding.btnStake100.setBackgroundResource(if (selectedStakeXp == 100) R.drawable.btn_orange_rounded else R.drawable.bg_input_field)
-        binding.btnStake100.setTextColor(ContextCompat.getColor(this, if (selectedStakeXp == 100) R.color.bg_black else R.color.text_white))
+        binding.btnStake100.setBackgroundResource(if (selectedStakeXp == 100) R.drawable.bg_pill_chip_active else R.drawable.bg_pill_chip)
+        binding.btnStake100.setTextColor(ContextCompat.getColor(this, if (selectedStakeXp == 100) R.color.on_accent else R.color.text_primary))
 
-        binding.btnStake200.setBackgroundResource(if (selectedStakeXp == 200) R.drawable.btn_orange_rounded else R.drawable.bg_input_field)
-        binding.btnStake200.setTextColor(ContextCompat.getColor(this, if (selectedStakeXp == 200) R.color.bg_black else R.color.text_white))
+        binding.btnStake200.setBackgroundResource(if (selectedStakeXp == 200) R.drawable.bg_pill_chip_active else R.drawable.bg_pill_chip)
+        binding.btnStake200.setTextColor(ContextCompat.getColor(this, if (selectedStakeXp == 200) R.color.on_accent else R.color.text_primary))
     }
 
     private fun setupActions() {
@@ -187,7 +189,7 @@ class MainActivity : AppCompatActivity() {
             )
 
             if (prefs.addFriend(newFriend)) {
-                Toast.makeText(this, "Added $handle to your accountability circle!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Added $handle to your circle!", Toast.LENGTH_SHORT).show()
                 binding.etAddFriend.text.clear()
                 renderLeaderboardAndFriends()
             } else {
@@ -204,7 +206,6 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        // Deduct stake from available XP
         user.totalXp -= selectedStakeXp
         prefs.saveCurrentUser(user)
 
@@ -221,7 +222,6 @@ class MainActivity : AppCompatActivity() {
 
         prefs.addStake(newStake)
 
-        // Launch Walk Tracker
         val intent = Intent(this, WalkTrackerActivity::class.java).apply {
             putExtra("STAKE_ID", newStake.id)
             putExtra("TARGET_METERS", selectedMeters)
@@ -257,22 +257,22 @@ class MainActivity : AppCompatActivity() {
                 tvStakeXp.text = "${stake.stakeXp} XP"
 
                 if (stake.isPending) {
-                    tvCategory.text = "PENDING VERIFICATION"
-                    tvCategory.setTextColor(ContextCompat.getColor(this, R.color.brand_orange))
-                    tvDesc.text = "Proof submitted (${stake.currentMeters}m). Waiting for peer review."
+                    tvCategory.text = "PENDING PROOF"
+                    tvCategory.setTextColor(ContextCompat.getColor(this, R.color.accent_light))
+                    tvDesc.text = "Walk completed (${stake.currentMeters}m). Waiting for peer review."
                     btnAction.text = "In Escrow"
                     btnAction.isEnabled = false
                 } else if (stake.isCompleted) {
                     tvCategory.text = "VERIFIED & WON"
-                    tvCategory.setTextColor(ContextCompat.getColor(this, R.color.brand_orange))
+                    tvCategory.setTextColor(ContextCompat.getColor(this, R.color.success))
                     tvDesc.text = "Completed (${stake.currentMeters}m). XP and streak payout awarded!"
                     btnAction.text = "Completed"
                     btnAction.isEnabled = false
                     btnBurn.visibility = View.GONE
                 } else {
                     tvCategory.text = "ACTIVE TRACK"
-                    tvDesc.text = "Target: ${stake.targetMeters}m. Accelerometer and GPS active."
-                    btnAction.text = "Resume Tracker"
+                    tvDesc.text = "Target: ${stake.targetMeters}m. Hardware sensor and GPS active."
+                    btnAction.text = "Open Tracker"
                     btnAction.isEnabled = true
                     btnAction.setOnClickListener {
                         val intent = Intent(this, WalkTrackerActivity::class.java).apply {
@@ -342,8 +342,8 @@ class MainActivity : AppCompatActivity() {
                 val btnApprove = itemView.findViewById<Button>(R.id.btnVerifyApprove)
                 val btnReject = itemView.findViewById<Button>(R.id.btnVerifyReject)
 
-                tvUser.text = stake.creatorName.ifEmpty { "Challenger" }
-                tvMetrics.text = "${stake.title} • ${stake.currentMeters}m (${stake.stepsCount} steps recorded)"
+                tvUser.text = stake.creatorName.ifEmpty { "Athlete" }
+                tvMetrics.text = "${stake.title} • ${stake.currentMeters}m (${stake.stepsCount} steps)"
                 tvNote.text = "Proof Note: " + (stake.proofNote ?: "Hardware sensor verified.")
                 tvStakeXp.text = "${stake.stakeXp} XP Locked"
 
@@ -384,9 +384,9 @@ class MainActivity : AppCompatActivity() {
             SocialFeedItem(
                 id = "feed_" + UUID.randomUUID().toString().take(8),
                 userId = stake.creatorId,
-                userName = stake.creatorName.ifEmpty { "Challenger" },
+                userName = stake.creatorName.ifEmpty { "Athlete" },
                 actionType = "PEER_VERIFIED",
-                description = "${verifier.name} verified proof for '${stake.title}'! +$totalReward XP paid out.",
+                description = "${verifier.name} verified proof for '${stake.title}'! +$totalReward XP awarded.",
                 xpAmount = totalReward
             )
         )
@@ -414,7 +414,7 @@ class MainActivity : AppCompatActivity() {
             SocialFeedItem(
                 id = "feed_" + UUID.randomUUID().toString().take(8),
                 userId = stake.creatorId,
-                userName = stake.creatorName.ifEmpty { "Challenger" },
+                userName = stake.creatorName.ifEmpty { "Athlete" },
                 actionType = "STAKE_BURNED",
                 description = "${verifier.name} rejected proof for '${stake.title}'. ${stake.stakeXp} XP burned!",
                 xpAmount = stake.stakeXp
@@ -452,7 +452,7 @@ class MainActivity : AppCompatActivity() {
                     "PEER_VERIFIED", "STAKE_VERIFIED" -> "✓"
                     "STAKE_BURNED" -> "💀"
                     "PROOF_SUBMITTED" -> "📸"
-                    else -> "🔥"
+                    else -> "⚡"
                 }
 
                 tvUser.text = item.userName
@@ -498,11 +498,11 @@ class MainActivity : AppCompatActivity() {
             val rank = index + 1
             tvRank.text = rank.toString()
             if (rank == 1) {
-                tvRank.setBackgroundResource(R.drawable.btn_orange_rounded)
-                tvRank.setTextColor(ContextCompat.getColor(this, R.color.bg_black))
+                tvRank.setBackgroundResource(R.drawable.bg_pill_chip_active)
+                tvRank.setTextColor(ContextCompat.getColor(this, R.color.on_accent))
             } else {
-                tvRank.setBackgroundResource(R.drawable.bg_input_field)
-                tvRank.setTextColor(ContextCompat.getColor(this, R.color.text_white))
+                tvRank.setBackgroundResource(R.drawable.bg_pill_chip)
+                tvRank.setTextColor(ContextCompat.getColor(this, R.color.text_secondary))
             }
 
             tvName.text = "${friend.name}  ${friend.username}"

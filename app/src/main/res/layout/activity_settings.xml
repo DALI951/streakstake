@@ -3,14 +3,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg_black"
+    android:background="@color/bg_base"
     android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="20dp">
+        android:padding="16dp">
 
         <!-- Top Header with Back Button -->
         <LinearLayout
@@ -23,9 +23,9 @@
                 android:id="@+id/btnBackSettings"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:background="@drawable/bg_input_field"
+                android:background="@drawable/btn_outlined_hairline"
                 android:text="←"
-                android:textColor="@color/text_white"
+                android:textColor="@color/text_primary"
                 android:textSize="18sp"
                 app:backgroundTint="@null" />
 
@@ -34,11 +34,107 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="14dp"
                 android:layout_weight="1"
-                android:fontFamily="sans-serif-black"
-                android:letterSpacing="0.04"
-                android:text="SETTINGS &amp; CONFIG"
-                android:textColor="@color/brand_orange"
-                android:textSize="18sp" />
+                android:fontFamily="sans-serif-bold"
+                android:letterSpacing="-0.02"
+                android:text="Profile &amp; Settings"
+                android:textColor="@color/text_primary"
+                android:textSize="20sp" />
+        </LinearLayout>
+
+        <!-- Identity Card (From Calisthenics ProfileScreen) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/bg_card_dark"
+            android:orientation="vertical"
+            android:padding="18dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tvSettingsAvatar"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="@drawable/bg_circle_avatar"
+                    android:gravity="center"
+                    android:text="A"
+                    android:textColor="@color/accent_light"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="14dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tvProfileName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif-bold"
+                        android:text="Athlete"
+                        android:textColor="@color/text_primary"
+                        android:textSize="17sp" />
+
+                    <TextView
+                        android:id="@+id/tvProfileHandle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@athlete"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="13sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Level / XP progress bar -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:fontFamily="sans-serif-bold"
+                        android:text="Level 1 Athlete"
+                        android:textColor="@color/text_primary"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/tvProfileXp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="500 XP"
+                        android:textColor="@color/accent_light"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <ProgressBar
+                    android:id="@+id/pbProfileLevel"
+                    style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="6dp"
+                    android:layout_marginTop="8dp"
+                    android:max="1000"
+                    android:progress="500"
+                    android:progressTint="@color/accent" />
+            </LinearLayout>
+
         </LinearLayout>
 
         <!-- SECTION 1: ACCOUNT CONFIGURATION -->
@@ -46,15 +142,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:fontFamily="sans-serif-black"
-            android:text="ACCOUNT CONFIGURATION"
-            android:textColor="@color/brand_orange"
-            android:textSize="12sp" />
+            android:fontFamily="sans-serif-bold"
+            android:text="Account Details"
+            android:textColor="@color/text_primary"
+            android:textSize="16sp" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="10dp"
             android:background="@drawable/bg_card_dark"
             android:orientation="vertical"
             android:padding="18dp">
@@ -63,39 +159,39 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Display Name"
-                android:textColor="@color/text_gray"
-                android:textSize="11sp" />
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp" />
 
             <EditText
                 android:id="@+id/etSettingsName"
                 android:layout_width="match_parent"
                 android:layout_height="46dp"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="6dp"
                 android:background="@drawable/bg_input_field"
-                android:hint="Challenger Name"
+                android:hint="Athlete Name"
                 android:paddingHorizontal="14dp"
-                android:textColor="@color/text_white"
-                android:textColorHint="@color/text_gray"
+                android:textColor="@color/text_primary"
+                android:textColorHint="@color/text_disabled"
                 android:textSize="13sp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="14dp"
                 android:text="Username Handle"
-                android:textColor="@color/text_gray"
-                android:textSize="11sp" />
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp" />
 
             <EditText
                 android:id="@+id/etSettingsHandle"
                 android:layout_width="match_parent"
                 android:layout_height="46dp"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="6dp"
                 android:background="@drawable/bg_input_field"
                 android:hint="@username"
                 android:paddingHorizontal="14dp"
-                android:textColor="@color/text_white"
-                android:textColorHint="@color/text_gray"
+                android:textColor="@color/text_primary"
+                android:textColorHint="@color/text_disabled"
                 android:textSize="13sp" />
 
             <Button
@@ -103,11 +199,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="44dp"
                 android:layout_marginTop="16dp"
-                android:background="@drawable/btn_orange_rounded"
+                android:background="@drawable/btn_accent_primary"
                 android:fontFamily="sans-serif-bold"
-                android:text="Save Account Changes"
+                android:text="Save Changes"
                 android:textAllCaps="false"
-                android:textColor="@color/bg_black"
+                android:textColor="@color/on_accent"
                 android:textSize="13sp"
                 app:backgroundTint="@null" />
         </LinearLayout>
@@ -117,15 +213,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:fontFamily="sans-serif-black"
-            android:text="GITHUB IN-APP UPDATER"
-            android:textColor="@color/brand_orange"
-            android:textSize="12sp" />
+            android:fontFamily="sans-serif-bold"
+            android:text="GitHub In-App Updates"
+            android:textColor="@color/text_primary"
+            android:textSize="16sp" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="10dp"
             android:background="@drawable/bg_card_dark"
             android:orientation="vertical"
             android:padding="18dp">
@@ -142,19 +238,19 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:fontFamily="sans-serif-bold"
-                    android:text="Installed Version: v2.2.0"
-                    android:textColor="@color/text_white"
+                    android:text="Installed Version: v2.3.0"
+                    android:textColor="@color/text_primary"
                     android:textSize="14sp" />
 
                 <TextView
                     android:id="@+id/tvUpdateStatusBadge"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/bg_input_field"
-                    android:paddingHorizontal="8dp"
+                    android:background="@drawable/bg_pill_chip"
+                    android:paddingHorizontal="10dp"
                     android:paddingVertical="3dp"
                     android:text="UP TO DATE"
-                    android:textColor="@color/brand_orange"
+                    android:textColor="@color/accent_light"
                     android:textSize="10sp"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -162,22 +258,22 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
+                android:layout_marginTop="8dp"
                 android:lineSpacingExtra="2dp"
-                android:text="StreakStake compiles directly via GitHub Actions. Tapping below checks for the latest APK release and installs it."
-                android:textColor="@color/text_gray"
-                android:textSize="12sp" />
+                android:text="StreakStake compiles via GitHub Actions. Tapping below checks for the latest APK release and installs it directly."
+                android:textColor="@color/text_secondary"
+                android:textSize="13sp" />
 
             <Button
                 android:id="@+id/btnCheckUpdatesSettings"
                 android:layout_width="match_parent"
-                android:layout_height="46dp"
-                android:layout_marginTop="14dp"
-                android:background="@drawable/btn_orange_rounded"
-                android:fontFamily="sans-serif-black"
-                android:text="⚡ CHECK FOR UPDATES NOW"
+                android:layout_height="44dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/btn_accent_primary"
+                android:fontFamily="sans-serif-bold"
+                android:text="Check for Updates Now"
                 android:textAllCaps="false"
-                android:textColor="@color/bg_black"
+                android:textColor="@color/on_accent"
                 android:textSize="13sp"
                 app:backgroundTint="@null" />
 
@@ -187,9 +283,9 @@
                 android:layout_height="40dp"
                 android:layout_marginTop="8dp"
                 android:background="@android:color/transparent"
-                android:text="Open GitHub Repository ↗"
+                android:text="View GitHub Releases ↗"
                 android:textAllCaps="false"
-                android:textColor="@color/text_gray"
+                android:textColor="@color/text_secondary"
                 android:textSize="12sp" />
         </LinearLayout>
 
@@ -198,15 +294,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:fontFamily="sans-serif-black"
-            android:text="TRACKING &amp; SENSORS"
-            android:textColor="@color/brand_orange"
-            android:textSize="12sp" />
+            android:fontFamily="sans-serif-bold"
+            android:text="Sensors &amp; Motion"
+            android:textColor="@color/text_primary"
+            android:textSize="16sp" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="10dp"
             android:background="@drawable/bg_card_dark"
             android:orientation="vertical"
             android:padding="18dp">
@@ -222,22 +318,27 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="GPS Distance Tracking"
-                    android:textColor="@color/text_white"
-                    android:textSize="13sp" />
+                    android:textColor="@color/text_primary"
+                    android:textSize="14sp" />
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/switchGps"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:checked="true"
-                    app:thumbTint="@color/brand_orange"
-                    app:trackTint="@color/border_dark" />
+                    app:thumbTint="@color/accent"
+                    app:trackTint="@color/hairline" />
             </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginVertical="12dp"
+                android:background="@color/hairline" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
@@ -246,41 +347,33 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Haptic Vibration Feedback"
-                    android:textColor="@color/text_white"
-                    android:textSize="13sp" />
+                    android:textColor="@color/text_primary"
+                    android:textSize="14sp" />
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/switchHaptic"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:checked="true"
-                    app:thumbTint="@color/brand_orange"
-                    app:trackTint="@color/border_dark" />
+                    app:thumbTint="@color/accent"
+                    app:trackTint="@color/hairline" />
             </LinearLayout>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:text="Hardware Step Sensor + Accelerometer peak filter active."
-                android:textColor="@color/text_gray"
-                android:textSize="11sp" />
         </LinearLayout>
 
-        <!-- SECTION 4: DATA RESET & LOGOUT -->
+        <!-- SECTION 4: DATA RESET & LOGOUT (Danger section) -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:fontFamily="sans-serif-black"
-            android:text="DATA &amp; SESSION"
-            android:textColor="@color/brand_orange"
-            android:textSize="12sp" />
+            android:fontFamily="sans-serif-bold"
+            android:text="Account &amp; Data"
+            android:textColor="@color/text_primary"
+            android:textSize="16sp" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="10dp"
             android:layout_marginBottom="32dp"
             android:background="@drawable/bg_card_dark"
             android:orientation="vertical"
@@ -290,12 +383,12 @@
                 android:id="@+id/btnResetData"
                 android:layout_width="match_parent"
                 android:layout_height="44dp"
-                android:background="@drawable/bg_input_field"
+                android:background="@drawable/btn_outlined_hairline"
                 android:fontFamily="sans-serif-medium"
                 android:text="Reset Stakes &amp; Restore 500 XP"
                 android:textAllCaps="false"
-                android:textColor="@color/text_white"
-                android:textSize="12sp"
+                android:textColor="@color/text_primary"
+                android:textSize="13sp"
                 app:backgroundTint="@null" />
 
             <Button
@@ -303,12 +396,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="44dp"
                 android:layout_marginTop="10dp"
-                android:background="@drawable/bg_input_field"
+                android:background="@drawable/btn_outlined_hairline"
                 android:fontFamily="sans-serif-bold"
                 android:text="Sign Out"
                 android:textAllCaps="false"
-                android:textColor="@color/brand_orange"
-                android:textSize="12sp"
+                android:textColor="@color/danger"
+                android:textSize="13sp"
                 app:backgroundTint="@null" />
         </LinearLayout>
 

@@ -8,6 +8,7 @@
     android:orientation="vertical"
     android:padding="16dp">
 
+    <!-- Category Chip & Stake XP -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -18,12 +19,13 @@
             android:id="@+id/tvCardCategory"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_input_field"
-            android:paddingHorizontal="8dp"
-            android:paddingVertical="2dp"
+            android:background="@drawable/bg_pill_chip"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="3dp"
             android:text="WALK TRACK"
-            android:textColor="@color/brand_orange"
-            android:textSize="10sp" />
+            android:textColor="@color/accent_light"
+            android:textSize="10sp"
+            android:textStyle="bold" />
 
         <View
             android:layout_width="0dp"
@@ -36,7 +38,7 @@
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif-black"
             android:text="100 XP"
-            android:textColor="@color/brand_orange"
+            android:textColor="@color/accent_light"
             android:textSize="14sp" />
     </LinearLayout>
 
@@ -44,52 +46,53 @@
         android:id="@+id/tvCardTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="10dp"
         android:fontFamily="sans-serif-bold"
         android:text="Walk 500 Meters"
-        android:textColor="@color/text_white"
-        android:textSize="15sp" />
+        android:textColor="@color/text_primary"
+        android:textSize="16sp" />
 
     <TextView
         android:id="@+id/tvCardDesc"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
+        android:layout_marginTop="3dp"
         android:text="Accelerometer and GPS detection active."
-        android:textColor="@color/text_gray"
-        android:textSize="12sp" />
+        android:textColor="@color/text_secondary"
+        android:textSize="13sp" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="14dp"
         android:orientation="horizontal">
 
         <Button
             android:id="@+id/btnCardAction"
             android:layout_width="0dp"
-            android:layout_height="42dp"
+            android:layout_height="44dp"
             android:layout_marginEnd="6dp"
             android:layout_weight="2"
-            android:background="@drawable/btn_orange_rounded"
-            android:fontFamily="sans-serif-medium"
+            android:background="@drawable/btn_accent_primary"
+            android:fontFamily="sans-serif-bold"
             android:text="Open Tracker"
             android:textAllCaps="false"
-            android:textColor="@color/text_white"
-            android:textSize="12sp"
+            android:textColor="@color/on_accent"
+            android:textSize="13sp"
             app:backgroundTint="@null" />
 
         <Button
             android:id="@+id/btnCardBurn"
             android:layout_width="0dp"
-            android:layout_height="42dp"
+            android:layout_height="44dp"
             android:layout_marginStart="6dp"
             android:layout_weight="1"
-            android:background="@drawable/bg_input_field"
+            android:background="@drawable/btn_outlined_hairline"
+            android:fontFamily="sans-serif-medium"
             android:text="Burn"
             android:textAllCaps="false"
-            android:textColor="@color/text_gray"
-            android:textSize="12sp"
+            android:textColor="@color/text_secondary"
+            android:textSize="13sp"
             app:backgroundTint="@null" />
     </LinearLayout>
 

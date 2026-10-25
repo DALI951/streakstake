@@ -1,19 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Strict Minimalist Two-Color Design System -->
-    <!-- Color 1: Primary Radiant Accent -->
-    <color name="brand_orange">#FF5500</color>
-    <color name="brand_orange_light">#FF7722</color>
-    <color name="brand_orange_dim">#33FF5500</color>
+    <!-- Dali's Fitness UI Design System (from Calisthenics) -->
+    <!-- Base Cinema Dark -->
+    <color name="bg_base">#0A0A0F</color>
+    <color name="surface">#12121A</color>
+    <color name="surface_high">#171722</color>
+    <color name="surface_raised">#1C1C28</color>
 
-    <!-- Color 2: Deep Dark Background & Slate Surfaces -->
-    <color name="bg_black">#0A0B10</color>
-    <color name="surface_dark">#141622</color>
-    <color name="surface_dark_card">#1B1E2E</color>
-    <color name="border_dark">#282D42</color>
+    <!-- Hairline Borders -->
+    <color name="hairline">#14FFFFFF</color>
+    <color name="hairline_strong">#26FFFFFF</color>
 
-    <!-- Monochrome Text -->
-    <color name="text_white">#FFFFFF</color>
-    <color name="text_gray">#8E94A5</color>
-    <color name="text_muted">#555B6E</color>
+    <!-- The ONE Accent (Crimson Red) -->
+    <color name="accent">#DC2626</color>
+    <color name="accent_dark">#B91C1C</color>
+    <color name="accent_light">#EF4444</color>
+    <color name="accent_glow">#26EF4444</color>
+    <color name="on_accent">#FFFFFF</color>
+
+    <!-- Typography Text Tokens -->
+    <color name="text_primary">#F2F2F5</color>
+    <color name="text_secondary">#9CA3AF</color>
+    <color name="text_disabled">#55555F</color>
+
+    <!-- Semantic -->
+    <color name="success">#22C55E</color>
+    <color name="warning">#F59E0B</color>
+    <color name="danger">#F87171</color>
 </resources>

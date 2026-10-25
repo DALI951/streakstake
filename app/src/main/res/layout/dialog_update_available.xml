@@ -4,7 +4,7 @@
     android:layout_height="wrap_content"
     android:background="@drawable/bg_card_dark"
     android:orientation="vertical"
-    android:padding="24dp">
+    android:padding="20dp">
 
     <!-- Header badge -->
     <LinearLayout
@@ -16,11 +16,11 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/btn_orange_rounded"
+            android:background="@drawable/bg_pill_chip_active"
             android:paddingHorizontal="10dp"
-            android:paddingVertical="4dp"
+            android:paddingVertical="3dp"
             android:text="UPDATE AVAILABLE"
-            android:textColor="@color/bg_black"
+            android:textColor="@color/on_accent"
             android:textSize="10sp"
             android:textStyle="bold" />
 
@@ -34,7 +34,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="0%"
-            android:textColor="@color/brand_orange"
+            android:textColor="@color/accent_light"
             android:textSize="12sp"
             android:textStyle="bold"
             android:visibility="gone" />
@@ -45,19 +45,19 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        android:text="New Release v2.1.0"
-        android:textColor="@color/text_white"
-        android:textSize="18sp"
-        android:textStyle="bold" />
+        android:fontFamily="sans-serif-bold"
+        android:text="New Release"
+        android:textColor="@color/text_primary"
+        android:textSize="18sp" />
 
     <TextView
         android:id="@+id/tvUpdateNotes"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="6dp"
         android:lineSpacingExtra="3dp"
         android:text="Changelog details from GitHub release."
-        android:textColor="@color/text_gray"
+        android:textColor="@color/text_secondary"
         android:textSize="13sp" />
 
     <!-- Progress bar -->
@@ -70,8 +70,8 @@
         android:indeterminate="false"
         android:max="100"
         android:progress="0"
-        android:progressBackgroundTint="@color/border_dark"
-        android:progressTint="@color/brand_orange"
+        android:progressBackgroundTint="@color/surface_high"
+        android:progressTint="@color/accent"
         android:visibility="gone" />
 
     <LinearLayout
@@ -83,26 +83,28 @@
         <Button
             android:id="@+id/btnDismissUpdate"
             android:layout_width="0dp"
-            android:layout_height="46dp"
+            android:layout_height="44dp"
             android:layout_marginEnd="6dp"
             android:layout_weight="1"
-            android:background="@drawable/bg_input_field"
-            android:text="LATER"
-            android:textColor="@color/text_gray"
-            android:textSize="12sp"
-            android:textStyle="bold" />
+            android:background="@drawable/btn_outlined_hairline"
+            android:fontFamily="sans-serif-medium"
+            android:text="Later"
+            android:textAllCaps="false"
+            android:textColor="@color/text_secondary"
+            android:textSize="13sp" />
 
         <Button
             android:id="@+id/btnDownloadUpdate"
             android:layout_width="0dp"
-            android:layout_height="46dp"
+            android:layout_height="44dp"
             android:layout_marginStart="6dp"
             android:layout_weight="1.4"
-            android:background="@drawable/btn_orange_rounded"
-            android:text="INSTALL NOW"
-            android:textColor="@color/bg_black"
-            android:textSize="12sp"
-            android:textStyle="bold" />
+            android:background="@drawable/btn_accent_primary"
+            android:fontFamily="sans-serif-bold"
+            android:text="Install Update"
+            android:textAllCaps="false"
+            android:textColor="@color/on_accent"
+            android:textSize="13sp" />
     </LinearLayout>
 
 </LinearLayout>

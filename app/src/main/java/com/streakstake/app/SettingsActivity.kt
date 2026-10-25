@@ -2,12 +2,11 @@ package com.streakstake.app
 
 import android.app.AlertDialog
 import android.content.Intent
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.streakstake.app.data.AppPreferences
 import com.streakstake.app.databinding.ActivitySettingsBinding
 import com.streakstake.app.models.GitHubAsset
@@ -29,7 +28,7 @@ class SettingsActivity : AppCompatActivity() {
         updateManager = GitHubUpdateManager(this)
 
         setupHeader()
-        loadAccountConfig()
+        loadIdentityAndAccount()
         setupUpdater()
         setupSensorsConfig()
         setupDataActions()
@@ -41,8 +40,15 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
-    private fun loadAccountConfig() {
+    private fun loadIdentityAndAccount() {
         val user = prefs.getCurrentUser() ?: return
+        val initial = user.name.take(1).uppercase()
+        binding.tvSettingsAvatar.text = initial
+        binding.tvProfileName.text = user.name
+        binding.tvProfileHandle.text = user.username
+        binding.tvProfileXp.text = "${user.totalXp} XP"
+        binding.pbProfileLevel.progress = user.totalXp.coerceIn(0, 1000)
+
         binding.etSettingsName.setText(user.name)
         binding.etSettingsHandle.setText(user.username)
 
@@ -56,6 +62,9 @@ class SettingsActivity : AppCompatActivity() {
             }
 
             prefs.updateAccountDetails(newName, newHandle)
+            binding.tvProfileName.text = newName
+            binding.tvProfileHandle.text = if (newHandle.startsWith("@")) newHandle else "@$newHandle"
+            binding.tvSettingsAvatar.text = newName.take(1).uppercase()
             Toast.makeText(this, "Account updated successfully!", Toast.LENGTH_SHORT).show()
         }
     }
@@ -63,12 +72,11 @@ class SettingsActivity : AppCompatActivity() {
     private fun setupUpdater() {
         binding.tvSettingsVersion.text = "Installed Version: v${BuildConfig.VERSION_NAME}"
 
-        // Check if an update is available silently on open
         updateManager.checkForUpdates(silent = true, object : GitHubUpdateManager.UpdateCheckCallback {
             override fun onUpdateAvailable(release: GitHubRelease, apkAsset: GitHubAsset) {
                 binding.tvUpdateStatusBadge.text = "UPDATE: ${release.tag_name}"
-                binding.tvUpdateStatusBadge.setBackgroundResource(R.drawable.btn_orange_rounded)
-                binding.tvUpdateStatusBadge.setTextColor(getColor(R.color.bg_black))
+                binding.tvUpdateStatusBadge.setBackgroundResource(R.drawable.bg_pill_chip_active)
+                binding.tvUpdateStatusBadge.setTextColor(ContextCompat.getColor(this@SettingsActivity, R.color.on_accent))
             }
             override fun onUpToDate() {
                 binding.tvUpdateStatusBadge.text = "UP TO DATE"
@@ -108,17 +116,18 @@ class SettingsActivity : AppCompatActivity() {
 
         binding.switchHaptic.setOnCheckedChangeListener { _, isChecked ->
             prefs.setHapticEnabled(isChecked)
-            Toast.makeText(this, "Haptic Vibration: " + if (isChecked) "Enabled" else "Disabled", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Haptic Feedback: " + if (isChecked) "Enabled" else "Disabled", Toast.LENGTH_SHORT).show()
         }
     }
 
     private fun setupDataActions() {
         binding.btnResetData.setOnClickListener {
             AlertDialog.Builder(this)
-                .setTitle("Reset Activity Data?")
-                .setMessage("This will clear active stakes, activity feed, and reset your XP balance to 500 XP.")
+                .setTitle("Reset Stakes & Data?")
+                .setMessage("This will clear active stakes, activity feed, and restore 500 XP.")
                 .setPositiveButton("Reset") { _, _ ->
                     prefs.resetAccountData()
+                    loadIdentityAndAccount()
                     Toast.makeText(this, "Data reset. 500 XP balance restored.", Toast.LENGTH_SHORT).show()
                 }
                 .setNegativeButton("Cancel", null)

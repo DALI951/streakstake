@@ -3,18 +3,18 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg_black"
+    android:background="@color/bg_base"
     android:orientation="vertical">
 
-    <!-- Top Sleek Header -->
+    <!-- ShellAppBar Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/surface_dark"
+        android:background="@color/surface"
         android:orientation="vertical"
-        android:paddingHorizontal="20dp"
-        android:paddingTop="18dp"
-        android:paddingBottom="16dp">
+        android:paddingHorizontal="16dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="14dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -22,14 +22,17 @@
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
-            <!-- Avatar Flame Icon -->
+            <!-- Avatar Circle with Initial -->
             <TextView
+                android:id="@+id/tvAvatarInitial"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:background="@drawable/bg_input_field"
+                android:background="@drawable/bg_circle_avatar"
                 android:gravity="center"
-                android:text="🔥"
-                android:textSize="18sp" />
+                android:text="A"
+                android:textColor="@color/accent_light"
+                android:textSize="16sp"
+                android:textStyle="bold" />
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -42,19 +45,18 @@
                     android:id="@+id/tvUserName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif-black"
-                    android:text="Challenger"
-                    android:textColor="@color/text_white"
-                    android:textSize="18sp" />
+                    android:fontFamily="sans-serif-bold"
+                    android:text="Athlete"
+                    android:textColor="@color/text_primary"
+                    android:textSize="17sp" />
 
                 <TextView
                     android:id="@+id/tvUserHandle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@challenger"
-                    android:textColor="@color/brand_orange"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
+                    android:text="@athlete"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp" />
             </LinearLayout>
 
             <!-- Dedicated Settings Button -->
@@ -62,81 +64,120 @@
                 android:id="@+id/btnSettings"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:background="@drawable/bg_card_dark"
+                android:background="@drawable/btn_outlined_hairline"
                 android:text="⚙️"
-                android:textSize="16sp"
+                android:textSize="15sp"
                 app:backgroundTint="@null" />
         </LinearLayout>
 
-        <!-- Stats Bar: Available XP & Current Streak -->
+        <!-- Hairline Divider -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="14dp"
+            android:background="@color/hairline" />
+
+        <!-- 3-Column Stat Row (StatBlock from Calisthenics) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="14dp"
+            android:layout_marginTop="12dp"
             android:baselineAligned="false"
             android:orientation="horizontal">
 
+            <!-- Stat 1: Available XP -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="6dp"
+                android:layout_marginEnd="4dp"
                 android:layout_weight="1"
                 android:background="@drawable/bg_card_dark"
                 android:orientation="vertical"
                 android:padding="12dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:letterSpacing="0.04"
-                    android:text="AVAILABLE XP"
-                    android:textColor="@color/text_gray"
-                    android:textSize="10sp"
-                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/tvXpBalance"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
                     android:fontFamily="sans-serif-black"
                     android:text="500 XP"
-                    android:textColor="@color/brand_orange"
-                    android:textSize="22sp" />
+                    android:textColor="@color/text_primary"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:letterSpacing="0.04"
+                    android:text="AVAILABLE XP"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="10sp"
+                    android:textStyle="bold" />
             </LinearLayout>
 
+            <!-- Stat 2: Streak -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
+                android:layout_marginHorizontal="4dp"
                 android:layout_weight="1"
                 android:background="@drawable/bg_card_dark"
                 android:orientation="vertical"
                 android:padding="12dp">
 
                 <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:letterSpacing="0.04"
-                    android:text="CURRENT STREAK"
-                    android:textColor="@color/text_gray"
-                    android:textSize="10sp"
-                    android:textStyle="bold" />
-
-                <TextView
                     android:id="@+id/tvStreakCount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
                     android:fontFamily="sans-serif-black"
                     android:text="0 Days"
-                    android:textColor="@color/text_white"
-                    android:textSize="22sp" />
+                    android:textColor="@color/accent_light"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:letterSpacing="0.04"
+                    android:text="DAY STREAK"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="10sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- Stat 3: Completed / Won -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_card_dark"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <TextView
+                    android:id="@+id/tvCompletedCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif-black"
+                    android:text="0 Won"
+                    android:textColor="@color/text_primary"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:letterSpacing="0.04"
+                    android:text="VERIFIED"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="10sp"
+                    android:textStyle="bold" />
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 
-    <!-- Main Content Container (Swapped by Tabs) -->
+    <!-- Content Area (Tabs) -->
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -154,23 +195,24 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="20dp">
+                android:padding="16dp">
 
-                <!-- Challenge Walk Creator Card -->
+                <!-- Featured Target Card (AppCard with Highlight Glow) -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/bg_card_dark"
+                    android:background="@drawable/bg_card_highlight"
                     android:orientation="vertical"
-                    android:padding="20dp">
+                    android:padding="18dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:fontFamily="sans-serif-black"
-                        android:text="SET WALK DISTANCE TARGET"
-                        android:textColor="@color/brand_orange"
-                        android:textSize="12sp" />
+                        android:letterSpacing="0.06"
+                        android:text="WALK DISTANCE TARGET"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
 
                     <!-- Distance Selector Buttons -->
                     <LinearLayout
@@ -185,9 +227,9 @@
                             android:layout_height="44dp"
                             android:layout_marginEnd="4dp"
                             android:layout_weight="1"
-                            android:background="@drawable/bg_input_field"
+                            android:background="@drawable/bg_pill_chip"
                             android:text="250m"
-                            android:textColor="@color/text_white"
+                            android:textColor="@color/text_primary"
                             android:textSize="13sp"
                             android:textStyle="bold"
                             app:backgroundTint="@null" />
@@ -198,9 +240,9 @@
                             android:layout_height="44dp"
                             android:layout_marginHorizontal="4dp"
                             android:layout_weight="1"
-                            android:background="@drawable/btn_orange_rounded"
+                            android:background="@drawable/bg_pill_chip_active"
                             android:text="500m"
-                            android:textColor="@color/bg_black"
+                            android:textColor="@color/on_accent"
                             android:textSize="13sp"
                             android:textStyle="bold"
                             app:backgroundTint="@null" />
@@ -211,9 +253,9 @@
                             android:layout_height="44dp"
                             android:layout_marginStart="4dp"
                             android:layout_weight="1"
-                            android:background="@drawable/bg_input_field"
+                            android:background="@drawable/bg_pill_chip"
                             android:text="1,000m"
-                            android:textColor="@color/text_white"
+                            android:textColor="@color/text_primary"
                             android:textSize="13sp"
                             android:textStyle="bold"
                             app:backgroundTint="@null" />
@@ -222,11 +264,12 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="18dp"
-                        android:fontFamily="sans-serif-black"
+                        android:layout_marginTop="16dp"
+                        android:letterSpacing="0.06"
                         android:text="LOCK YOUR XP STAKE"
-                        android:textColor="@color/brand_orange"
-                        android:textSize="12sp" />
+                        android:textColor="@color/text_secondary"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
 
                     <!-- Stake Selector Buttons -->
                     <LinearLayout
@@ -241,9 +284,9 @@
                             android:layout_height="44dp"
                             android:layout_marginEnd="4dp"
                             android:layout_weight="1"
-                            android:background="@drawable/bg_input_field"
+                            android:background="@drawable/bg_pill_chip"
                             android:text="50 XP"
-                            android:textColor="@color/text_white"
+                            android:textColor="@color/text_primary"
                             android:textSize="13sp"
                             android:textStyle="bold"
                             app:backgroundTint="@null" />
@@ -254,9 +297,9 @@
                             android:layout_height="44dp"
                             android:layout_marginHorizontal="4dp"
                             android:layout_weight="1"
-                            android:background="@drawable/btn_orange_rounded"
+                            android:background="@drawable/bg_pill_chip_active"
                             android:text="100 XP"
-                            android:textColor="@color/bg_black"
+                            android:textColor="@color/on_accent"
                             android:textSize="13sp"
                             android:textStyle="bold"
                             app:backgroundTint="@null" />
@@ -267,9 +310,9 @@
                             android:layout_height="44dp"
                             android:layout_marginStart="4dp"
                             android:layout_weight="1"
-                            android:background="@drawable/bg_input_field"
+                            android:background="@drawable/bg_pill_chip"
                             android:text="200 XP"
-                            android:textColor="@color/text_white"
+                            android:textColor="@color/text_primary"
                             android:textSize="13sp"
                             android:textStyle="bold"
                             app:backgroundTint="@null" />
@@ -279,29 +322,28 @@
                     <Button
                         android:id="@+id/btnStartWalk"
                         android:layout_width="match_parent"
-                        android:layout_height="52dp"
-                        android:layout_marginTop="20dp"
-                        android:background="@drawable/btn_orange_rounded"
-                        android:fontFamily="sans-serif-black"
-                        android:letterSpacing="0.02"
-                        android:text="LOCK STAKE &amp; START WALKING"
+                        android:layout_height="48dp"
+                        android:layout_marginTop="18dp"
+                        android:background="@drawable/btn_accent_primary"
+                        android:fontFamily="sans-serif-bold"
+                        android:text="Start Walk Challenge"
                         android:textAllCaps="false"
-                        android:textColor="@color/bg_black"
+                        android:textColor="@color/on_accent"
                         android:textSize="14sp"
                         app:backgroundTint="@null" />
                 </LinearLayout>
 
-                <!-- Active / Pending Stakes Section -->
+                <!-- Section Header -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="26dp"
-                    android:fontFamily="sans-serif-black"
-                    android:text="ACTIVE &amp; PENDING STAKES"
-                    android:textColor="@color/brand_orange"
-                    android:textSize="13sp" />
+                    android:layout_marginTop="24dp"
+                    android:fontFamily="sans-serif-bold"
+                    android:text="Active Stakes"
+                    android:textColor="@color/text_primary"
+                    android:textSize="18sp" />
 
-                <!-- Empty State -->
+                <!-- Empty State (AppEmptyState from Calisthenics) -->
                 <LinearLayout
                     android:id="@+id/layoutEmptyStakes"
                     android:layout_width="match_parent"
@@ -310,23 +352,32 @@
                     android:background="@drawable/bg_card_dark"
                     android:gravity="center"
                     android:orientation="vertical"
-                    android:padding="28dp">
+                    android:padding="32dp">
+
+                    <TextView
+                        android:layout_width="56dp"
+                        android:layout_height="56dp"
+                        android:background="@drawable/bg_empty_circle"
+                        android:gravity="center"
+                        android:text="🚶"
+                        android:textSize="22sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:fontFamily="sans-serif-medium"
-                        android:text="No Active Stakes"
-                        android:textColor="@color/text_white"
-                        android:textSize="14sp" />
+                        android:layout_marginTop="16dp"
+                        android:fontFamily="sans-serif-bold"
+                        android:text="No active stakes"
+                        android:textColor="@color/text_primary"
+                        android:textSize="15sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="Select a distance target above and lock your XP!"
-                        android:textColor="@color/text_gray"
-                        android:textSize="12sp" />
+                        android:text="Lock in an XP stake above and step outside."
+                        android:textColor="@color/text_secondary"
+                        android:textSize="13sp" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -352,23 +403,23 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="20dp">
+                android:padding="16dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif-black"
-                    android:text="PEER VERIFICATION QUEUE"
-                    android:textColor="@color/brand_orange"
-                    android:textSize="14sp" />
+                    android:fontFamily="sans-serif-bold"
+                    android:text="Peer Verification"
+                    android:textColor="@color/text_primary"
+                    android:textSize="18sp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="Verify a friend's proof to unlock their reward, or reject to burn their stake."
-                    android:textColor="@color/text_gray"
-                    android:textSize="12sp" />
+                    android:text="Review proof to unlock XP, or reject to burn stake."
+                    android:textColor="@color/text_secondary"
+                    android:textSize="13sp" />
 
                 <!-- Empty State -->
                 <LinearLayout
@@ -382,20 +433,31 @@
                     android:padding="32dp">
 
                     <TextView
+                        android:layout_width="56dp"
+                        android:layout_height="56dp"
+                        android:background="@drawable/bg_empty_circle"
+                        android:gravity="center"
+                        android:text="✓"
+                        android:textColor="@color/accent_light"
+                        android:textSize="22sp"
+                        android:textStyle="bold" />
+
+                    <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:fontFamily="sans-serif-medium"
-                        android:text="Queue is Clear"
-                        android:textColor="@color/text_white"
-                        android:textSize="14sp" />
+                        android:layout_marginTop="16dp"
+                        android:fontFamily="sans-serif-bold"
+                        android:text="Queue is clean"
+                        android:textColor="@color/text_primary"
+                        android:textSize="15sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:text="No pending proofs waiting for peer review."
-                        android:textColor="@color/text_gray"
-                        android:textSize="12sp" />
+                        android:textColor="@color/text_secondary"
+                        android:textSize="13sp" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -421,23 +483,23 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="20dp">
+                android:padding="16dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif-black"
-                    android:text="LIVE ACCOUNTABILITY FEED"
-                    android:textColor="@color/brand_orange"
-                    android:textSize="14sp" />
+                    android:fontFamily="sans-serif-bold"
+                    android:text="Activity Feed"
+                    android:textColor="@color/text_primary"
+                    android:textSize="18sp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="Real-time stakes, peer verifications, and burned XP."
-                    android:textColor="@color/text_gray"
-                    android:textSize="12sp" />
+                    android:text="Real-time stakes, verifications, and streak bonuses."
+                    android:textColor="@color/text_secondary"
+                    android:textSize="13sp" />
 
                 <!-- Empty Feed -->
                 <LinearLayout
@@ -451,20 +513,29 @@
                     android:padding="32dp">
 
                     <TextView
+                        android:layout_width="56dp"
+                        android:layout_height="56dp"
+                        android:background="@drawable/bg_empty_circle"
+                        android:gravity="center"
+                        android:text="🔥"
+                        android:textSize="22sp" />
+
+                    <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:fontFamily="sans-serif-medium"
-                        android:text="No Activity Yet"
-                        android:textColor="@color/text_white"
-                        android:textSize="14sp" />
+                        android:layout_marginTop="16dp"
+                        android:fontFamily="sans-serif-bold"
+                        android:text="No activity yet"
+                        android:textColor="@color/text_primary"
+                        android:textSize="15sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="Activity will appear as you and friends stake &amp; verify."
-                        android:textColor="@color/text_gray"
-                        android:textSize="12sp" />
+                        android:text="Events will show here as you and friends stake."
+                        android:textColor="@color/text_secondary"
+                        android:textSize="13sp" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -490,16 +561,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="20dp">
+                android:padding="16dp">
 
                 <!-- Add Friend Box -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif-black"
-                    android:text="ADD ACCOUNTABILITY PARTNER"
-                    android:textColor="@color/brand_orange"
-                    android:textSize="13sp" />
+                    android:fontFamily="sans-serif-bold"
+                    android:text="Accountability Partner"
+                    android:textColor="@color/text_primary"
+                    android:textSize="18sp" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -510,25 +581,25 @@
                     <EditText
                         android:id="@+id/etAddFriend"
                         android:layout_width="0dp"
-                        android:layout_height="44dp"
+                        android:layout_height="46dp"
                         android:layout_marginEnd="8dp"
                         android:layout_weight="1"
                         android:background="@drawable/bg_input_field"
                         android:hint="Enter @username or email"
-                        android:paddingHorizontal="12dp"
-                        android:textColor="@color/text_white"
-                        android:textColorHint="@color/text_gray"
+                        android:paddingHorizontal="14dp"
+                        android:textColor="@color/text_primary"
+                        android:textColorHint="@color/text_disabled"
                         android:textSize="13sp" />
 
                     <Button
                         android:id="@+id/btnAddFriend"
                         android:layout_width="wrap_content"
-                        android:layout_height="44dp"
-                        android:background="@drawable/btn_orange_rounded"
+                        android:layout_height="46dp"
+                        android:background="@drawable/btn_accent_primary"
                         android:paddingHorizontal="16dp"
-                        android:text="ADD"
-                        android:textColor="@color/bg_black"
-                        android:textSize="12sp"
+                        android:text="Add"
+                        android:textColor="@color/on_accent"
+                        android:textSize="13sp"
                         android:textStyle="bold"
                         app:backgroundTint="@null" />
                 </LinearLayout>
@@ -538,10 +609,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="24dp"
-                    android:fontFamily="sans-serif-black"
-                    android:text="FRIENDS LEADERBOARD"
-                    android:textColor="@color/text_white"
-                    android:textSize="13sp" />
+                    android:fontFamily="sans-serif-bold"
+                    android:text="Friends Leaderboard"
+                    android:textColor="@color/text_primary"
+                    android:textSize="18sp" />
 
                 <LinearLayout
                     android:id="@+id/layoutLeaderboardContainer"
@@ -555,11 +626,11 @@
 
     </FrameLayout>
 
-    <!-- Bottom Navigation Bar (4 Sleek Tabs) -->
+    <!-- Bottom Navigation Bar (app_shell.dart style) -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="58dp"
-        android:background="@color/surface_dark"
+        android:layout_height="56dp"
+        android:background="@color/surface"
         android:orientation="horizontal">
 
         <LinearLayout
@@ -582,9 +653,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:text="STAKES"
-                android:textColor="@color/brand_orange"
-                android:textSize="10sp"
+                android:text="Stakes"
+                android:textColor="@color/accent_light"
+                android:textSize="11sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
@@ -608,9 +679,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:text="VERIFY"
-                android:textColor="@color/text_gray"
-                android:textSize="10sp"
+                android:text="Verify"
+                android:textColor="@color/text_secondary"
+                android:textSize="11sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
@@ -634,9 +705,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:text="FEED"
-                android:textColor="@color/text_gray"
-                android:textSize="10sp"
+                android:text="Feed"
+                android:textColor="@color/text_secondary"
+                android:textSize="11sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
@@ -660,9 +731,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:text="FRIENDS"
-                android:textColor="@color/text_gray"
-                android:textSize="10sp"
+                android:text="Friends"
+                android:textColor="@color/text_secondary"
+                android:textSize="11sp"
                 android:textStyle="bold" />
         </LinearLayout>
 

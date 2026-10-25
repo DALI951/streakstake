@@ -47,29 +47,29 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
         with:
-          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v2.2.0' }}
-          name: StreakStake Native Android Release ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v2.2.0' }}
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v2.3.0' }}
+          name: StreakStake Native Android Release ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v2.3.0' }}
           draft: false
           prerelease: false
           files: release-artifacts/StreakStake.apk
           body: |
-            ## 📱 StreakStake v2.2.0 - Elevated UI/UX, Dedicated Settings & Instant Google Sign-In
+            ## 📱 StreakStake v2.3.0 - Calisthenics Design System Overhaul
 
-            Completely rebuilt as a 100% Native Android application (Kotlin & Gradle). Zero TypeScript, zero web views, zero bloat.
+            Completely rebuilt using Dali's Calisthenics "Dark Cinema First" design system (#0A0A0F base, #12121A surface, hairline borders, and the ONE crimson red accent #DC2626).
 
             ### 🚀 Direct Download
-            - **APK Binary:** [`StreakStake.apk`](https://github.com/DALI951/streakstake/releases/download/v2.2.0/StreakStake.apk)
+            - **APK Binary:** [`StreakStake.apk`](https://github.com/DALI951/streakstake/releases/download/v2.3.0/StreakStake.apk)
 
-            ### 🌟 What's New in v2.2.0:
-            - ⚡ **Instant One-Tap Google Sign-In:** Direct entry without asking for email, forms, or actual personal name. Automatically assigns an anonymous challenger handle and grants 500 XP starter balance immediately.
-            - ⚙️ **Dedicated Settings & Config Screen:**
-              - Account configuration (customize Display Name and @Username handle).
-              - In-App GitHub Auto-Updater (check for updates, download & install latest APK).
-              - Motion & Sensor controls (toggle GPS distance tracking and haptic vibration feedback).
-              - Data management (reset activity data / sign out).
-            - 🎨 **Elevated UI/UX:** Refined dark athletic aesthetic strictly adhering to Pitch Black (`#0A0B10`) and Flame Orange (`#FF5500`), clean navigation, and sleek cards.
-            - ⚖️ **Peer Verification ("Proof or Burn"):** Staked XP stays in escrow until friends verify proof (+1.5x reward) or burn stake.
-            - 🔥 **Live Social Dashboard:** Real-time activity feed showing friend stakes, verifications, and burns.
-            - 🚶 **Hardware Step & Walking Meter Detector:** Uses Android's `SensorManager` and GPS for step detection.
+            ### 🌟 Design & Feature Upgrades:
+            - 🎨 **Dali's Calisthenics Design System:** True dark cinema styling with `#0A0A0F` base, `#12121A` surface, hairline borders (`rgba(255, 255, 255, 0.08)`), and the signature `#DC2626` / `#EF4444` crimson red accent.
+            - ⚡ **Instant 1-Tap Google Entry:** Direct entry with zero questions, no email prompt, no personal name used. Grants an anonymous athlete handle and 500 XP starter balance immediately.
+            - 📊 **3-Column Stat Row:** 28sp tabular bold figures for XP balance, active day streak, and verified challenges.
+            - ⚙️ **Calisthenics Profile & Settings Hub:**
+              - Identity card with athlete initial circle avatar, name, handle, and Level XP progress bar.
+              - In-App GitHub Auto-Updater (checks releases, downloads, and launches package installer).
+              - Motion controls: toggle GPS distance tracking and haptic vibration feedback.
+              - Data controls: reset activity data / sign out.
+            - ⚖️ **Peer Verification Hub:** Review pending proofs with 1-tap "Verify" (+1.5x payout) or "Burn".
+            - 🚶 **Native Step & Meter Detector:** Hardware sensor counting + GPS distance tracking.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

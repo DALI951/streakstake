@@ -21,7 +21,6 @@ class SignInActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         prefs = AppPreferences(this)
 
-        // If user already authenticated, go directly to Main
         if (prefs.getCurrentUser() != null) {
             navigateToMain()
             return
@@ -39,10 +38,10 @@ class SignInActivity : AppCompatActivity() {
             handleFastGoogleAuth()
         }
 
-        binding.tvToggleCustomAuth.setOnClickListener {
+        binding.btnCustomAccountToggle.setOnClickListener {
             isCustomExpanded = !isCustomExpanded
             binding.layoutCustomAuth.visibility = if (isCustomExpanded) View.VISIBLE else View.GONE
-            binding.tvToggleCustomAuth.text = if (isCustomExpanded) "Hide custom credentials ▴" else "Or sign in with custom credentials ▾"
+            binding.btnCustomAccountToggle.text = if (isCustomExpanded) "Hide custom account form" else "Sign In with Custom Account"
         }
 
         binding.btnCustomSubmit.setOnClickListener {
@@ -52,13 +51,13 @@ class SignInActivity : AppCompatActivity() {
 
     private fun handleFastGoogleAuth() {
         val randomNum = Random().nextInt(900) + 100
-        val anonymousName = "Challenger #$randomNum"
-        val anonymousHandle = "@challenger_$randomNum"
+        val anonymousName = "Athlete #$randomNum"
+        val anonymousHandle = "@athlete_$randomNum"
 
         val user = User(
             id = "g_user_" + UUID.randomUUID().toString().take(8),
             name = anonymousName,
-            email = "challenger$randomNum@streakstake.app",
+            email = "athlete$randomNum@streakstake.app",
             username = anonymousHandle,
             totalXp = 500,
             currentStreak = 0,
@@ -68,19 +67,18 @@ class SignInActivity : AppCompatActivity() {
         )
 
         prefs.saveCurrentUser(user)
-        Toast.makeText(this, "Welcome $anonymousHandle! 500 XP granted.", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "Signed in as $anonymousHandle • 500 XP granted", Toast.LENGTH_SHORT).show()
         navigateToMain()
     }
 
     private fun handleCustomAuth() {
         val nameInput = binding.etCustomName.text.toString().trim()
         val emailInput = binding.etCustomEmail.text.toString().trim()
-        val passwordInput = binding.etCustomPassword.text.toString().trim()
 
         val randomNum = Random().nextInt(900) + 100
-        val name = if (nameInput.isNotEmpty()) nameInput else "Challenger #$randomNum"
+        val name = if (nameInput.isNotEmpty()) nameInput else "Athlete #$randomNum"
         val handle = "@" + name.lowercase().replace(" ", "_").take(15)
-        val email = if (emailInput.isNotEmpty()) emailInput else "challenger$randomNum@streakstake.app"
+        val email = if (emailInput.isNotEmpty()) emailInput else "athlete$randomNum@streakstake.app"
 
         val user = User(
             id = "user_" + UUID.randomUUID().toString().take(8),
@@ -95,7 +93,7 @@ class SignInActivity : AppCompatActivity() {
         )
 
         prefs.saveCurrentUser(user)
-        Toast.makeText(this, "Account created: $handle! 500 XP granted.", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "Welcome, $handle! 500 XP granted.", Toast.LENGTH_SHORT).show()
         navigateToMain()
     }
 
