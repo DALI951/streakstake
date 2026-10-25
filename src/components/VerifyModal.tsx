@@ -24,7 +24,7 @@ export const VerifyModal: React.FC<VerifyModalProps> = ({
 
   if (!isOpen || !challenge) return null;
 
-  const isCreator = challenge.creatorId === currentUser.id;
+  const isCreator = challenge.creatorId === currentUser?.id;
   const canVerify = !isCreator && challenge.status === 'pending_verification' && !isReadOnly;
 
   const handleVerify = () => {

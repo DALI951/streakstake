@@ -1,4 +1,4 @@
-export type ChallengeCategory = 'fitness' | 'coding' | 'reading' | 'health' | 'mindset' | 'custom';
+export type ChallengeCategory = 'fitness' | 'walking' | 'coding' | 'reading' | 'health' | 'mindset' | 'custom';
 
 export type ChallengeStatus = 
   | 'active'               // Currently in progress, stake is locked
@@ -17,6 +17,13 @@ export interface ProofSubmission {
   verifiedByUserName?: string;
   verifiedAt?: string;
   rejectionReason?: string;
+  telemetryData?: {
+    steps: number;
+    meters: number;
+    durationSeconds: number;
+    avgSpeedKmh: number;
+    verifiedMethod: 'accelerometer_gps' | 'pedometer' | 'manual';
+  };
 }
 
 export interface Challenge {
@@ -32,11 +39,15 @@ export interface Challenge {
   deadline: string; // ISO string
   createdAt: string;
   status: ChallengeStatus;
-  proofType: 'photo' | 'checklist' | 'mixed';
+  proofType: 'photo' | 'checklist' | 'pedometer' | 'mixed';
   proof?: ProofSubmission;
   isGroupChallenge: boolean;
   participantIds: string[]; // Friends participating and locking equal stake
   tags?: string[];
+  // Walking / Step Detection properties
+  walkTargetMeters?: number;
+  walkCompletedMeters?: number;
+  walkStepsCount?: number;
 }
 
 export interface UserBadge {
@@ -63,6 +74,7 @@ export interface UserProfile {
   friends: string[]; // User IDs
   badges: UserBadge[];
   weeklyXp: number;
+  createdAt?: string;
 }
 
 export type FeedEventType = 
@@ -71,6 +83,7 @@ export type FeedEventType =
   | 'challenge_verified'
   | 'xp_burned'
   | 'streak_milestone'
+  | 'walk_completed'
   | 'badge_unlocked';
 
 export interface FeedItem {
@@ -87,6 +100,7 @@ export interface FeedItem {
   streakCount?: number;
   verifierName?: string;
   proofImageUrl?: string;
+  telemetryNote?: string;
   message: string;
   timestamp: string;
   likes: string[]; // User IDs who cheered

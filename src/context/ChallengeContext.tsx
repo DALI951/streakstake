@@ -1,9 +1,17 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import confetti from 'canvas-confetti';
 import { Challenge, ChallengeCategory, FeedItem, NotificationItem, ProofSubmission } from '../types/challenge';
-import { StorageService } from '../services/storageService';
 import { audio } from '../services/audioService';
 import { useAuth } from './AuthContext';
+import { 
+  db, 
+  collection, 
+  onSnapshot, 
+  doc, 
+  setDoc, 
+  deleteDoc, 
+  updateDoc 
+} from '../services/firebase';
 
 interface CreateChallengeInput {
   title: string;
@@ -11,7 +19,8 @@ interface CreateChallengeInput {
   category: ChallengeCategory;
   stakeXp: number;
   deadlineHours: number;
-  proofType: 'photo' | 'checklist' | 'mixed';
+  proofType: 'photo' | 'checklist' | 'pedometer' | 'mixed';
+  walkTargetMeters?: number;
   isGroupChallenge: boolean;
   participantIds: string[];
 }
@@ -22,7 +31,7 @@ interface ChallengeContextType {
   notifications: NotificationItem[];
   createChallenge: (input: CreateChallengeInput) => boolean;
   deleteChallenge: (challengeId: string) => void;
-  submitProof: (challengeId: string, notes: string, imageUrl?: string) => void;
+  submitProof: (challengeId: string, notes: string, imageUrl?: string, telemetry?: ProofSubmission['telemetryData']) => void;
   verifyChallenge: (challengeId: string) => void;
   rejectChallenge: (challengeId: string, reason: string) => void;
   burnChallengeManually: (challengeId: string) => void;
@@ -35,113 +44,125 @@ interface ChallengeContextType {
 
 const ChallengeContext = createContext<ChallengeContextType | undefined>(undefined);
 
+const LOCAL_STORAGE_CHALLENGES = 'streakstake_challenges_clean_v2';
+const LOCAL_STORAGE_FEED = 'streakstake_feed_clean_v2';
+const LOCAL_STORAGE_NOTIFS = 'streakstake_notifs_clean_v2';
+
 export const ChallengeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { currentUser, updateUserXp, updateUserStreak, users } = useAuth();
-  const [challenges, setChallenges] = useState<Challenge[]>(() => StorageService.getChallenges());
-  const [feed, setFeed] = useState<FeedItem[]>(() => StorageService.getFeed());
-  const [notifications, setNotifications] = useState<NotificationItem[]>(() => StorageService.getNotifications());
+  
+  const [challenges, setChallenges] = useState<Challenge[]>(() => {
+    const raw = localStorage.getItem(LOCAL_STORAGE_CHALLENGES);
+    return raw ? JSON.parse(raw) : [];
+  });
+  
+  const [feed, setFeed] = useState<FeedItem[]>(() => {
+    const raw = localStorage.getItem(LOCAL_STORAGE_FEED);
+    return raw ? JSON.parse(raw) : [];
+  });
+  
+  const [notifications, setNotifications] = useState<NotificationItem[]>(() => {
+    const raw = localStorage.getItem(LOCAL_STORAGE_NOTIFS);
+    return raw ? JSON.parse(raw) : [];
+  });
 
-  // Save to localStorage when state changes
+  // Sync to local storage for offline support
   useEffect(() => {
-    StorageService.saveChallenges(challenges);
+    localStorage.setItem(LOCAL_STORAGE_CHALLENGES, JSON.stringify(challenges));
   }, [challenges]);
 
   useEffect(() => {
-    StorageService.saveFeed(feed);
+    localStorage.setItem(LOCAL_STORAGE_FEED, JSON.stringify(feed));
   }, [feed]);
 
   useEffect(() => {
-    StorageService.saveNotifications(notifications);
+    localStorage.setItem(LOCAL_STORAGE_NOTIFS, JSON.stringify(notifications));
   }, [notifications]);
 
-  // Streak Multiplier Formula:
-  // 0-2 streak: 1.0x
-  // 3-4 streak: 1.5x (Triggered by 3-streak rule!)
-  // 5+ streak: 2.0x (Elite streak multiplier)
+  // Real-time Firestore Live Sync for Challenges
+  useEffect(() => {
+    try {
+      const unsub = onSnapshot(collection(db, 'challenges'), (snapshot) => {
+        const remoteChallenges: Challenge[] = [];
+        snapshot.forEach((d) => {
+          remoteChallenges.push(d.data() as Challenge);
+        });
+        if (remoteChallenges.length > 0) {
+          setChallenges(remoteChallenges);
+        }
+      }, (err) => {
+        console.warn('Firestore challenges snapshot notice:', err.message);
+      });
+      return () => unsub();
+    } catch {}
+  }, []);
+
+  // Real-time Firestore Live Sync for Feed
+  useEffect(() => {
+    try {
+      const unsub = onSnapshot(collection(db, 'feed'), (snapshot) => {
+        const remoteFeed: FeedItem[] = [];
+        snapshot.forEach((d) => {
+          remoteFeed.push(d.data() as FeedItem);
+        });
+        if (remoteFeed.length > 0) {
+          // Sort by timestamp descending
+          remoteFeed.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+          setFeed(remoteFeed);
+        }
+      }, (err) => {
+        console.warn('Firestore feed snapshot notice:', err.message);
+      });
+      return () => unsub();
+    } catch {}
+  }, []);
+
   const calculateMultiplier = useCallback((streak: number): number => {
     if (streak >= 5) return 2.0;
-    if (streak >= 2) return 1.5; // Next completion will be 3rd or 4th!
+    if (streak >= 2) return 1.5;
     return 1.0;
   }, []);
 
-  // Request browser push notification permission
-  useEffect(() => {
-    if (typeof window !== 'undefined' && 'Notification' in window) {
-      if (Notification.permission === 'default') {
-        Notification.requestPermission().catch(() => {});
-      }
-    }
-  }, []);
-
-  const sendBrowserNotification = (title: string, body: string) => {
-    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
-      try {
-        new Notification(title, { body, icon: '/favicon.svg' });
-      } catch {
-        // Ignored in unsupported browsers
-      }
-    }
-  };
-
-  // Automated Deadline & Punishment Engine (Simulates Cloud Function Cron)
-  // Runs every 4 seconds to sweep for expired deadlines
+  // Automated Deadline Sweeper
   useEffect(() => {
     const interval = setInterval(() => {
       const now = new Date().getTime();
 
-      setChallenges((prevChallenges) => {
+      setChallenges((prev) => {
         let hasChanges = false;
-        const updated = prevChallenges.map((challenge) => {
-          if ((challenge.status === 'active' || challenge.status === 'pending_verification') && new Date(challenge.deadline).getTime() < now) {
+        const updated = prev.map((c) => {
+          if ((c.status === 'active' || c.status === 'pending_verification') && new Date(c.deadline).getTime() < now) {
             hasChanges = true;
-            // Challenge deadline passed without verification!
-            // Burn the stake, reset streak!
-            updateUserXp(challenge.creatorId, 0, -challenge.stakeXp);
-            updateUserStreak(challenge.creatorId, false);
-
+            updateUserXp(c.creatorId, 0, -c.stakeXp);
+            updateUserStreak(c.creatorId, false);
             audio.playBurn();
 
-            // Broadcast burn event to social feed
             const burnFeedItem: FeedItem = {
               id: 'burn_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
               type: 'xp_burned',
-              userId: challenge.creatorId,
-              userName: challenge.creatorName,
-              userAvatar: challenge.creatorAvatar,
-              challengeId: challenge.id,
-              challengeTitle: challenge.title,
-              burnedXp: challenge.stakeXp,
+              userId: c.creatorId,
+              userName: c.creatorName,
+              userAvatar: c.creatorAvatar,
+              challengeId: c.id,
+              challengeTitle: c.title,
+              burnedXp: c.stakeXp,
               streakCount: 0,
-              message: `💀 Deadline passed on "${challenge.title}". ${challenge.stakeXp} XP burned & streak reset to 0!`,
+              message: `💀 Deadline passed on "${c.title}". ${c.stakeXp} XP burned & streak reset to 0!`,
               timestamp: new Date().toISOString(),
               likes: []
             };
 
             setFeed((f) => [burnFeedItem, ...f]);
+            try {
+              setDoc(doc(db, 'feed', burnFeedItem.id), burnFeedItem);
+            } catch {}
 
-            // Add notification
-            const notif: NotificationItem = {
-              id: 'notif_burn_' + Date.now(),
-              userId: challenge.creatorId,
-              title: 'Stake Burned: Deadline Missed',
-              body: `Your deadline for "${challenge.title}" lapsed. ${challenge.stakeXp} XP was incinerated and your streak was reset to 0.`,
-              type: 'stake_burned',
-              read: false,
-              timestamp: new Date().toISOString(),
-              challengeId: challenge.id
-            };
-            setNotifications((n) => [notif, ...n]);
-            sendBrowserNotification('Streak Burned! 🔥💀', `Your stake of ${challenge.stakeXp} XP was lost on "${challenge.title}".`);
-
-            return {
-              ...challenge,
-              status: 'failed' as const
-            };
+            return { ...c, status: 'failed' as const };
           }
-          return challenge;
+          return c;
         });
 
-        return hasChanges ? updated : prevChallenges;
+        return hasChanges ? updated : prev;
       });
     }, 4000);
 
@@ -150,8 +171,9 @@ export const ChallengeProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   // Create Challenge & Lock XP Stake
   const createChallenge = (input: CreateChallengeInput): boolean => {
+    if (!currentUser) return false;
     if (currentUser.totalXp < input.stakeXp) {
-      alert(`Insufficient XP! You have ${currentUser.totalXp} XP available, but need ${input.stakeXp} XP to lock this stake.`);
+      alert(`Insufficient XP! You have ${currentUser.totalXp} XP, but need ${input.stakeXp} XP.`);
       return false;
     }
 
@@ -172,17 +194,20 @@ export const ChallengeProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       createdAt: new Date().toISOString(),
       status: 'active',
       proofType: input.proofType,
+      walkTargetMeters: input.walkTargetMeters,
       isGroupChallenge: input.isGroupChallenge,
       participantIds: input.isGroupChallenge ? [currentUser.id, ...input.participantIds] : [currentUser.id],
       tags: [input.category.toUpperCase()]
     };
 
-    // Lock stake: subtract from available XP, put into stakedXp
     updateUserXp(currentUser.id, -input.stakeXp, input.stakeXp);
-
     setChallenges((prev) => [newChallenge, ...prev]);
 
-    // Feed event
+    // Firestore sync
+    try {
+      setDoc(doc(db, 'challenges', newChallenge.id), newChallenge);
+    } catch {}
+
     const feedItem: FeedItem = {
       id: 'feed_stake_' + Date.now(),
       type: 'challenge_staked',
@@ -196,7 +221,11 @@ export const ChallengeProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       timestamp: new Date().toISOString(),
       likes: []
     };
+
     setFeed((prev) => [feedItem, ...prev]);
+    try {
+      setDoc(doc(db, 'feed', feedItem.id), feedItem);
+    } catch {}
 
     audio.playStakeLock();
     return true;
@@ -206,17 +235,24 @@ export const ChallengeProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     const target = challenges.find((c) => c.id === challengeId);
     if (!target) return;
 
-    // Refund locked stake if challenge is still active
     if (target.status === 'active' || target.status === 'pending_verification') {
       updateUserXp(target.creatorId, target.stakeXp, -target.stakeXp);
     }
 
     setChallenges((prev) => prev.filter((c) => c.id !== challengeId));
+    try {
+      deleteDoc(doc(db, 'challenges', challengeId));
+    } catch {}
     audio.playClick();
   };
 
-  // Submit Proof for Peer Review
-  const submitProof = (challengeId: string, notes: string, imageUrl?: string) => {
+  // Submit Proof for Peer Review (Supports Walking Telemetry or Photos)
+  const submitProof = (
+    challengeId: string, 
+    notes: string, 
+    imageUrl?: string,
+    telemetry?: ProofSubmission['telemetryData']
+  ) => {
     const target = challenges.find((c) => c.id === challengeId);
     if (!target) return;
 
@@ -224,14 +260,26 @@ export const ChallengeProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       id: 'proof_' + Date.now(),
       submittedAt: new Date().toISOString(),
       notes,
-      imageUrl: imageUrl || 'https://images.unsplash.com/photo-1434493789847-2f02dc6ca35d?w=800&auto=format&fit=crop&q=80'
+      imageUrl: imageUrl || (target.category === 'walking' 
+        ? 'https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?w=800&auto=format&fit=crop&q=80'
+        : 'https://images.unsplash.com/photo-1434493789847-2f02dc6ca35d?w=800&auto=format&fit=crop&q=80'),
+      telemetryData: telemetry
+    };
+
+    const updatedChallenge: Challenge = {
+      ...target,
+      status: 'pending_verification',
+      proof
     };
 
     setChallenges((prev) =>
-      prev.map((c) => (c.id === challengeId ? { ...c, status: 'pending_verification', proof } : c))
+      prev.map((c) => (c.id === challengeId ? updatedChallenge : c))
     );
 
-    // Broadcast proof submission to feed
+    try {
+      setDoc(doc(db, 'challenges', challengeId), updatedChallenge);
+    } catch {}
+
     const feedItem: FeedItem = {
       id: 'feed_proof_' + Date.now(),
       type: 'proof_submitted',
@@ -242,74 +290,59 @@ export const ChallengeProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       challengeTitle: target.title,
       stakeXp: target.stakeXp,
       proofImageUrl: proof.imageUrl,
-      message: `Completed "${target.title}" and submitted proof for peer verification! Tap to verify.`,
+      telemetryNote: notes,
+      message: `Completed "${target.title}" and submitted proof for peer verification!`,
       timestamp: new Date().toISOString(),
       likes: []
     };
-    setFeed((prev) => [feedItem, ...prev]);
 
-    // Send notifications to friends / participants
-    const friendsToNotify = users.filter((u) => u.id !== target.creatorId);
-    const newNotifs: NotificationItem[] = friendsToNotify.map((f) => ({
-      id: 'notif_verify_' + Date.now() + '_' + f.id,
-      userId: f.id,
-      title: 'Peer Proof Waiting for Review',
-      body: `${target.creatorName} completed "${target.title}". Review their proof to release their stake!`,
-      type: 'verification_request',
-      read: false,
-      timestamp: new Date().toISOString(),
-      challengeId: target.id
-    }));
-    setNotifications((prev) => [...newNotifs, ...prev]);
+    setFeed((prev) => [feedItem, ...prev]);
+    try {
+      setDoc(doc(db, 'feed', feedItem.id), feedItem);
+    } catch {}
 
     audio.playClick();
   };
 
-  // Peer Verification Flow (Friend Taps "Verify")
+  // Peer Verification Flow
   const verifyChallenge = (challengeId: string) => {
+    if (!currentUser) return;
     const target = challenges.find((c) => c.id === challengeId);
     if (!target) return;
 
-    // Prevent creator from verifying their own challenge (Anti-Cheat Peer Rule!)
     if (target.creatorId === currentUser.id) {
-      alert("Anti-Cheat Rule: You cannot verify your own challenge! A friend or accountability partner must verify your proof.");
+      alert("Anti-Cheat Rule: A friend or peer must verify your proof to release your stake!");
       return;
     }
 
-    // Calculate payouts
-    // Payout = Staked XP returned + (Staked XP * bonusMultiplier)
     const earnedBonus = Math.round(target.stakeXp * target.bonusMultiplier);
     const totalReturned = target.stakeXp + earnedBonus;
 
-    // Release creator's stake and award total XP
     updateUserXp(target.creatorId, totalReturned, -target.stakeXp);
     updateUserStreak(target.creatorId, true);
+    updateUserXp(currentUser.id, 25, 0); // Arbiter Bounty (+25 XP)
 
-    // Reward verifying friend with Arbiter Bounty (+25 XP)
-    updateUserXp(currentUser.id, 25, 0);
+    const updatedChallenge: Challenge = {
+      ...target,
+      status: 'completed',
+      proof: target.proof
+        ? {
+            ...target.proof,
+            verifiedByUserId: currentUser.id,
+            verifiedByUserName: currentUser.name,
+            verifiedAt: new Date().toISOString()
+          }
+        : undefined
+    };
 
-    // Update challenge
     setChallenges((prev) =>
-      prev.map((c) => {
-        if (c.id === challengeId) {
-          return {
-            ...c,
-            status: 'completed',
-            proof: c.proof
-              ? {
-                  ...c.proof,
-                  verifiedByUserId: currentUser.id,
-                  verifiedByUserName: currentUser.name,
-                  verifiedAt: new Date().toISOString()
-                }
-              : undefined
-          };
-        }
-        return c;
-      })
+      prev.map((c) => (c.id === challengeId ? updatedChallenge : c))
     );
 
-    // Confetti celebration
+    try {
+      setDoc(doc(db, 'challenges', challengeId), updatedChallenge);
+    } catch {}
+
     confetti({
       particleCount: 80,
       spread: 70,
@@ -322,10 +355,6 @@ export const ChallengeProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       audio.playSuccess();
     }
 
-    // Broadcast feed event
-    const creatorUser = users.find((u) => u.id === target.creatorId);
-    const newStreak = (creatorUser?.currentStreak || 0) + 1;
-
     const feedItem: FeedItem = {
       id: 'feed_verified_' + Date.now(),
       type: 'challenge_verified',
@@ -336,46 +365,19 @@ export const ChallengeProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       challengeId: target.id,
       challengeTitle: target.title,
       earnedXp: earnedBonus,
-      streakCount: newStreak,
-      message: `Verified! ${currentUser.name} approved ${target.creatorName}'s proof for "${target.title}". Stake returned + ${earnedBonus} XP bonus earned! 🔥 Current streak: ${newStreak}`,
+      message: `Verified! ${currentUser.name} approved ${target.creatorName}'s proof for "${target.title}". Stake returned + ${earnedBonus} XP bonus earned!`,
       timestamp: new Date().toISOString(),
       likes: [currentUser.id]
     };
+
     setFeed((prev) => [feedItem, ...prev]);
-
-    // If milestone reached (3-streak)
-    if (newStreak === 3 || newStreak === 5 || newStreak === 10) {
-      const milestoneItem: FeedItem = {
-        id: 'feed_milestone_' + Date.now(),
-        type: 'streak_milestone',
-        userId: target.creatorId,
-        userName: target.creatorName,
-        userAvatar: target.creatorAvatar,
-        streakCount: newStreak,
-        message: `🔥 STREAK MILESTONE! ${target.creatorName} hit an unbroken ${newStreak}-challenge streak!`,
-        timestamp: new Date().toISOString(),
-        likes: [currentUser.id]
-      };
-      setFeed((prev) => [milestoneItem, ...prev]);
-    }
-
-    // Send notification to creator
-    const notif: NotificationItem = {
-      id: 'notif_win_' + Date.now(),
-      userId: target.creatorId,
-      title: 'Proof Verified! 🎉',
-      body: `${currentUser.name} verified your proof for "${target.title}". You earned +${earnedBonus} XP bonus!`,
-      type: 'challenge_won',
-      read: false,
-      timestamp: new Date().toISOString(),
-      challengeId: target.id
-    };
-    setNotifications((prev) => [notif, ...prev]);
-    sendBrowserNotification('Proof Verified! 🎉', `${currentUser.name} verified your challenge proof!`);
+    try {
+      setDoc(doc(db, 'feed', feedItem.id), feedItem);
+    } catch {}
   };
 
-  // Peer Rejection Flow (Friend flags invalid proof)
   const rejectChallenge = (challengeId: string, reason: string) => {
+    if (!currentUser) return;
     const target = challenges.find((c) => c.id === challengeId);
     if (!target) return;
 
@@ -384,34 +386,33 @@ export const ChallengeProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       return;
     }
 
-    // Burn creator's stake and reset streak
     updateUserXp(target.creatorId, 0, -target.stakeXp);
     updateUserStreak(target.creatorId, false);
 
+    const updatedChallenge: Challenge = {
+      ...target,
+      status: 'rejected',
+      proof: target.proof
+        ? {
+            ...target.proof,
+            rejectionReason: reason,
+            verifiedByUserId: currentUser.id,
+            verifiedByUserName: currentUser.name,
+            verifiedAt: new Date().toISOString()
+          }
+        : undefined
+    };
+
     setChallenges((prev) =>
-      prev.map((c) => {
-        if (c.id === challengeId) {
-          return {
-            ...c,
-            status: 'rejected',
-            proof: c.proof
-              ? {
-                  ...c.proof,
-                  rejectionReason: reason,
-                  verifiedByUserId: currentUser.id,
-                  verifiedByUserName: currentUser.name,
-                  verifiedAt: new Date().toISOString()
-                }
-              : undefined
-          };
-        }
-        return c;
-      })
+      prev.map((c) => (c.id === challengeId ? updatedChallenge : c))
     );
+
+    try {
+      setDoc(doc(db, 'challenges', challengeId), updatedChallenge);
+    } catch {}
 
     audio.playBurn();
 
-    // Broadcast feed event
     const feedItem: FeedItem = {
       id: 'feed_rejected_' + Date.now(),
       type: 'xp_burned',
@@ -426,23 +427,13 @@ export const ChallengeProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       timestamp: new Date().toISOString(),
       likes: []
     };
-    setFeed((prev) => [feedItem, ...prev]);
 
-    // Send notification
-    const notif: NotificationItem = {
-      id: 'notif_reject_' + Date.now(),
-      userId: target.creatorId,
-      title: 'Proof Rejected & Stake Burned',
-      body: `${currentUser.name} flagged your proof: "${reason}". Your stake was burned and streak reset.`,
-      type: 'stake_burned',
-      read: false,
-      timestamp: new Date().toISOString(),
-      challengeId: target.id
-    };
-    setNotifications((prev) => [notif, ...prev]);
+    setFeed((prev) => [feedItem, ...prev]);
+    try {
+      setDoc(doc(db, 'feed', feedItem.id), feedItem);
+    } catch {}
   };
 
-  // Manual burn (e.g. user admits defeat before deadline)
   const burnChallengeManually = (challengeId: string) => {
     const target = challenges.find((c) => c.id === challengeId);
     if (!target) return;
@@ -454,26 +445,15 @@ export const ChallengeProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       prev.map((c) => (c.id === challengeId ? { ...c, status: 'failed' } : c))
     );
 
-    audio.playBurn();
+    try {
+      setDoc(doc(db, 'challenges', challengeId), { status: 'failed' }, { merge: true });
+    } catch {}
 
-    const feedItem: FeedItem = {
-      id: 'feed_manual_burn_' + Date.now(),
-      type: 'xp_burned',
-      userId: target.creatorId,
-      userName: target.creatorName,
-      userAvatar: target.creatorAvatar,
-      challengeId: target.id,
-      challengeTitle: target.title,
-      burnedXp: target.stakeXp,
-      message: `Surrendered "${target.title}". Burned ${target.stakeXp} XP & streak reset to 0.`,
-      timestamp: new Date().toISOString(),
-      likes: []
-    };
-    setFeed((prev) => [feedItem, ...prev]);
+    audio.playBurn();
   };
 
-  // Like / Cheer social feed item
   const likeFeedItem = (feedId: string) => {
+    if (!currentUser) return;
     setFeed((prev) =>
       prev.map((item) => {
         if (item.id !== feedId) return item;
@@ -481,7 +461,11 @@ export const ChallengeProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         const newLikes = alreadyLiked
           ? item.likes.filter((id) => id !== currentUser.id)
           : [...item.likes, currentUser.id];
-        return { ...item, likes: newLikes };
+        const updated = { ...item, likes: newLikes };
+        try {
+          setDoc(doc(db, 'feed', feedId), updated, { merge: true });
+        } catch {}
+        return updated;
       })
     );
     audio.playClick();
@@ -498,7 +482,7 @@ export const ChallengeProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   };
 
   const unreadNotificationCount = notifications.filter(
-    (n) => n.userId === currentUser.id && !n.read
+    (n) => n.userId === currentUser?.id && !n.read
   ).length;
 
   return (

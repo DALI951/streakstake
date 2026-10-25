@@ -7,6 +7,8 @@ export const StatsBanner: React.FC = () => {
   const { currentUser } = useAuth();
   const { calculateMultiplier } = useChallenges();
 
+  if (!currentUser) return null;
+
   const nextMultiplier = calculateMultiplier(currentUser.currentStreak);
   const totalGames = currentUser.challengesCompleted + currentUser.challengesFailed;
   const winRate = totalGames > 0 ? Math.round((currentUser.challengesCompleted / totalGames) * 100) : 100;

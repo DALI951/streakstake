@@ -70,7 +70,7 @@ export const BadgesView: React.FC = () => {
     }
   };
 
-  const unlockedIds = currentUser.badges.map((b) => b.id);
+  const unlockedIds = currentUser?.badges?.map((b) => b.id) || [];
 
   return (
     <div className="space-y-6">

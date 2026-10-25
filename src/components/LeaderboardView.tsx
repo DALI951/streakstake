@@ -181,7 +181,7 @@ export const LeaderboardView: React.FC = () => {
           <div className="space-y-2">
             {remaining.map((user, idx) => {
               const rank = idx + 4;
-              const isCurrentUser = user.id === currentUser.id;
+              const isCurrentUser = user.id === currentUser?.id;
 
               return (
                 <div

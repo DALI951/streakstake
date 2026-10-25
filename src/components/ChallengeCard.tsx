@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, ShieldCheck, Flame, Upload, Eye, CheckCircle2, XCircle, Users } from 'lucide-react';
+import { Clock, ShieldCheck, Flame, Upload, Eye, CheckCircle2, XCircle, Users, Footprints, Play } from 'lucide-react';
 import { Challenge } from '../types/challenge';
 import { useAuth } from '../context/AuthContext';
 import { useChallenges } from '../context/ChallengeContext';
@@ -9,6 +9,7 @@ interface ChallengeCardProps {
   onSubmitProof: (challenge: Challenge) => void;
   onVerifyProof: (challenge: Challenge) => void;
   onViewProof: (challenge: Challenge) => void;
+  onStartWalk?: (challenge: Challenge) => void;
 }
 
 export const ChallengeCard: React.FC<ChallengeCardProps> = ({
@@ -16,13 +17,15 @@ export const ChallengeCard: React.FC<ChallengeCardProps> = ({
   onSubmitProof,
   onVerifyProof,
   onViewProof,
+  onStartWalk,
 }) => {
   const { currentUser } = useAuth();
   const { burnChallengeManually } = useChallenges();
   const [timeLeft, setTimeLeft] = useState<string>('');
   const [isUrgent, setIsUrgent] = useState<boolean>(false);
 
-  const isCreator = challenge.creatorId === currentUser.id;
+  const isCreator = currentUser?.id === challenge.creatorId;
+  const isWalkingChallenge = challenge.category === 'walking' || challenge.proofType === 'pedometer';
 
   // Real-time countdown ticker
   useEffect(() => {
@@ -53,8 +56,10 @@ export const ChallengeCard: React.FC<ChallengeCardProps> = ({
   // Category styling
   const getCategoryBadge = (category: string) => {
     switch (category) {
-      case 'fitness':
+      case 'walking':
         return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
+      case 'fitness':
+        return 'bg-teal-500/20 text-teal-400 border-teal-500/30';
       case 'coding':
         return 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30';
       case 'reading':
@@ -152,6 +157,13 @@ export const ChallengeCard: React.FC<ChallengeCardProps> = ({
               {challenge.category}
             </span>
 
+            {challenge.walkTargetMeters && (
+              <span className="inline-flex items-center space-x-1 text-[9px] font-extrabold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                <Footprints className="w-2.5 h-2.5" />
+                <span>{challenge.walkTargetMeters} Meters</span>
+              </span>
+            )}
+
             {challenge.isGroupChallenge && (
               <span className="inline-flex items-center space-x-1 text-[9px] font-bold px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
                 <Users className="w-2.5 h-2.5" />
@@ -203,24 +215,36 @@ export const ChallengeCard: React.FC<ChallengeCardProps> = ({
       {/* Action Footer */}
       <div className="mt-4 pt-2">
         {challenge.status === 'active' && isCreator && (
-          <div className="grid grid-cols-3 gap-2">
-            <button
-              onClick={() => onSubmitProof(challenge)}
-              className="col-span-2 flex items-center justify-center space-x-1.5 py-2 px-3 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-white text-xs font-bold shadow-md shadow-orange-500/20 active:scale-95 transition-all"
-            >
-              <Upload className="w-3.5 h-3.5" />
-              <span>Submit Proof</span>
-            </button>
-            <button
-              onClick={() => {
-                if (confirm(`Surrender this challenge and burn ${challenge.stakeXp} XP?`)) {
-                  burnChallengeManually(challenge.id);
-                }
-              }}
-              className="col-span-1 py-2 px-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-semibold border border-red-500/30 transition-colors"
-            >
-              Surrender
-            </button>
+          <div className="space-y-2">
+            {isWalkingChallenge && onStartWalk && (
+              <button
+                onClick={() => onStartWalk(challenge)}
+                className="w-full flex items-center justify-center space-x-2 py-2.5 px-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 text-xs font-black shadow-lg shadow-emerald-500/20 active:scale-95 transition-all"
+              >
+                <Footprints className="w-4 h-4" />
+                <span>Track Live Walk ({challenge.walkTargetMeters || 500}m)</span>
+              </button>
+            )}
+
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                onClick={() => onSubmitProof(challenge)}
+                className={`${isWalkingChallenge ? 'col-span-2' : 'col-span-2'} flex items-center justify-center space-x-1.5 py-2 px-3 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-white text-xs font-bold shadow-md shadow-orange-500/20 active:scale-95 transition-all`}
+              >
+                <Upload className="w-3.5 h-3.5" />
+                <span>Upload Proof</span>
+              </button>
+              <button
+                onClick={() => {
+                  if (confirm(`Surrender this challenge and burn ${challenge.stakeXp} XP?`)) {
+                    burnChallengeManually(challenge.id);
+                  }
+                }}
+                className="col-span-1 py-2 px-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-semibold border border-red-500/30 transition-colors"
+              >
+                Surrender
+              </button>
+            </div>
           </div>
         )}
 

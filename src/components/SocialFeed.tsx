@@ -94,7 +94,7 @@ export const SocialFeed: React.FC = () => {
           filteredFeed.map((item) => {
             const badge = getEventBadge(item.type);
             const Icon = badge.icon;
-            const hasLiked = item.likes.includes(currentUser.id);
+            const hasLiked = item.likes.includes(currentUser?.id || '');
 
             return (
               <div

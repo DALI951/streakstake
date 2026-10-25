@@ -50,38 +50,37 @@ jobs:
       - name: Prepare APK binary for release
         run: |
           mkdir -p release-artifacts
-          cp android/app/build/outputs/apk/debug/app-debug.apk release-artifacts/StreakStake-v1.0.0.apk
+          cp android/app/build/outputs/apk/debug/app-debug.apk release-artifacts/StreakStake.apk
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: StreakStake-Android-APK
-          path: release-artifacts/StreakStake-v1.0.0.apk
+          path: release-artifacts/StreakStake.apk
           retention-days: 14
 
       - name: Create or Update GitHub Release
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
         with:
-          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v1.0.0' }}
-          name: StreakStake Android Release ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v1.0.0' }}
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v1.1.0' }}
+          name: StreakStake Android Release ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v1.1.0' }}
           draft: false
           prerelease: false
-          files: release-artifacts/StreakStake-v1.0.0.apk
+          files: release-artifacts/StreakStake.apk
           body: |
-            ## 🔥 StreakStake Android Release
+            ## 🔥 StreakStake v1.1.0 Android Release
             
-            Download the official **StreakStake APK** directly onto your Android device to start staking XP with friends and enforcing peer accountability.
+            Download the official **StreakStake APK** directly onto your Android device.
 
             ### 📱 Direct Download
-            - **Binary:** [`StreakStake-v1.0.0.apk`](https://github.com/DALI951/streakstake/releases/download/v1.0.0/StreakStake-v1.0.0.apk)
+            - **Binary:** [`StreakStake.apk`](https://github.com/DALI951/streakstake/releases/download/v1.1.0/StreakStake.apk)
 
-            ### 🌟 Core Gamification & Accountability Mechanics
-            - 💎 **XP Staking & Multipliers:** Put XP on the line; hitting a 3-challenge streak triggers an automatic 1.5x payout multiplier (2.0x for 5+ streaks).
-            - 🛡️ **Peer Verification System ("The Verification Gap"):** Completed challenges remain in *Pending* status until an accountability partner reviews and verifies your proof photo or note.
-            - 💀 **Automated Punishment & Burn Engine:** Lapsed deadlines and rejected proofs immediately burn staked XP and reset streaks to 0.
-            - ⚡ **Real-Time Social Dashboard:** Live activity feed showing friend commitments, verifications, and burns.
-            - 🏆 **Weekly Leaderboard & Reset Timer:** Compete against friends for seasonal ranks and accolades.
-            - 🏅 **Tier Badges:** First Blood, Triple Threat, High Roller, Fair Arbiter, Iron Will, and Legendary.
+            ### 🌟 New Features in v1.1.0:
+            - 🚶 **Live Walk Distance & Step Detection:** Set walking target (e.g. 500 meters) and track real-time physical steps via accelerometer motion peaks and GPS distance telemetry.
+            - 🔐 **Real Firebase Auth & Zero Bloat:** Requires clean sign in at launch with Google or Email. No dummy clutter. Starter 500 XP granted on registration.
+            - 🎨 **Unique 3D App Icon:** Custom-designed energetic neon flame 'S' crest and launcher icons.
+            - 🔄 **In-App GitHub OTA Updater:** Check releases and install updates directly from within the app.
+            - 🛡️ **Peer Proof-or-Burn:** Mandatory friend verification with Arbiter bonuses.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

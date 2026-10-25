@@ -13,8 +13,8 @@ export const FriendsView: React.FC<FriendsViewProps> = ({ onChallengeFriend }) =
   const [showAddModal, setShowAddModal] = useState(false);
   const [newFriendEmail, setNewFriendEmail] = useState('');
 
-  const friendProfiles = users.filter((u) => currentUser.friends.includes(u.id));
-  const nonFriends = users.filter((u) => u.id !== currentUser.id && !currentUser.friends.includes(u.id));
+  const friendProfiles = users.filter((u) => currentUser?.friends?.includes(u.id));
+  const nonFriends = users.filter((u) => u.id !== currentUser?.id && !currentUser?.friends?.includes(u.id));
 
   const filteredFriends = friendProfiles.filter(
     (f) =>

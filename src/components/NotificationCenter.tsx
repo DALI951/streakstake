@@ -20,7 +20,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
 
   if (!isOpen) return null;
 
-  const userNotifications = notifications.filter((n) => n.userId === currentUser.id);
+  const userNotifications = notifications.filter((n) => n.userId === currentUser?.id);
 
   const getNotifIcon = (type: NotificationItem['type']) => {
     switch (type) {

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Flame, ShieldAlert, Users, Award, Clock } from 'lucide-react';
+import { X, Flame, ShieldAlert, Users, Award, Clock, Footprints } from 'lucide-react';
 import { ChallengeCategory } from '../types/challenge';
 import { useAuth } from '../context/AuthContext';
 import { useChallenges } from '../context/ChallengeContext';
@@ -15,14 +15,15 @@ export const CreateChallengeModal: React.FC<CreateChallengeModalProps> = ({ isOp
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [category, setCategory] = useState<ChallengeCategory>('fitness');
+  const [category, setCategory] = useState<ChallengeCategory>('walking');
   const [stakeXp, setStakeXp] = useState<number>(100);
   const [deadlineHours, setDeadlineHours] = useState<number>(6);
-  const [proofType, setProofType] = useState<'photo' | 'checklist' | 'mixed'>('photo');
+  const [proofType, setProofType] = useState<'photo' | 'checklist' | 'pedometer' | 'mixed'>('pedometer');
+  const [walkTargetMeters, setWalkTargetMeters] = useState<number>(500);
   const [isGroupChallenge, setIsGroupChallenge] = useState<boolean>(false);
   const [selectedFriends, setSelectedFriends] = useState<string[]>([]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !currentUser) return null;
 
   const multiplier = calculateMultiplier(currentUser.currentStreak);
   const potentialPayout = Math.round(stakeXp * multiplier);
@@ -32,6 +33,23 @@ export const CreateChallengeModal: React.FC<CreateChallengeModalProps> = ({ isOp
     setSelectedFriends((prev) =>
       prev.includes(friendId) ? prev.filter((id) => id !== friendId) : [...prev, friendId]
     );
+  };
+
+  const handleCategorySelect = (cat: ChallengeCategory) => {
+    setCategory(cat);
+    if (cat === 'walking') {
+      setProofType('pedometer');
+      if (!title) setTitle(`Walk ${walkTargetMeters} Meters`);
+    } else if (proofType === 'pedometer') {
+      setProofType('photo');
+    }
+  };
+
+  const handleWalkPreset = (meters: number) => {
+    setWalkTargetMeters(meters);
+    if (category === 'walking' && (!title || title.startsWith('Walk '))) {
+      setTitle(`Walk ${meters} Meters`);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -48,21 +66,22 @@ export const CreateChallengeModal: React.FC<CreateChallengeModalProps> = ({ isOp
 
     const success = createChallenge({
       title: title.trim(),
-      description: description.trim() || 'No additional instructions provided.',
+      description: description.trim() || (category === 'walking' ? `Walk ${walkTargetMeters} meters using device accelerometer step and GPS detection.` : 'Challenge guidelines'),
       category,
       stakeXp,
       deadlineHours,
       proofType,
+      walkTargetMeters: category === 'walking' || proofType === 'pedometer' ? walkTargetMeters : undefined,
       isGroupChallenge,
       participantIds: selectedFriends
     });
 
     if (success) {
-      // Reset form
       setTitle('');
       setDescription('');
       setStakeXp(100);
       setDeadlineHours(6);
+      setWalkTargetMeters(500);
       setIsGroupChallenge(false);
       setSelectedFriends([]);
       onClose();
@@ -70,6 +89,7 @@ export const CreateChallengeModal: React.FC<CreateChallengeModalProps> = ({ isOp
   };
 
   const categories: { key: ChallengeCategory; label: string; icon: string }[] = [
+    { key: 'walking', label: 'Walk Track', icon: '🚶' },
     { key: 'fitness', label: 'Fitness', icon: '🏃' },
     { key: 'coding', label: 'Coding', icon: '💻' },
     { key: 'reading', label: 'Reading', icon: '📚' },
@@ -77,17 +97,18 @@ export const CreateChallengeModal: React.FC<CreateChallengeModalProps> = ({ isOp
     { key: 'mindset', label: 'Mindset', icon: '🧘' }
   ];
 
+  const walkMeterPresets = [250, 500, 1000, 2500, 5000];
   const stakePresets = [50, 100, 150, 250, 500];
   const deadlinePresets = [
-    { hours: 1, label: '1 Hour (Sprint)' },
+    { hours: 1, label: '1h Sprint' },
     { hours: 3, label: '3 Hours' },
     { hours: 6, label: '6 Hours' },
     { hours: 12, label: '12 Hours' },
-    { hours: 24, label: '24 Hours (Full Day)' }
+    { hours: 24, label: '24 Hours' }
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="relative w-full max-w-lg rounded-3xl bg-[#121422] border border-[#262b42] shadow-2xl p-6 max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-[#232738]">
@@ -97,7 +118,7 @@ export const CreateChallengeModal: React.FC<CreateChallengeModalProps> = ({ isOp
             </div>
             <div>
               <h2 className="text-lg font-black text-white">Stake New Challenge</h2>
-              <p className="text-xs text-slate-400">Put XP on the line with peer accountability</p>
+              <p className="text-xs text-slate-400">Put XP on the line with step detection & peer review</p>
             </div>
           </div>
           <button
@@ -108,33 +129,18 @@ export const CreateChallengeModal: React.FC<CreateChallengeModalProps> = ({ isOp
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="mt-5 space-y-5">
-          {/* Title */}
-          <div>
-            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
-              Challenge Title *
-            </label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. 5km morning run, Solve 3 LeetCode problems..."
-              className="w-full px-3.5 py-2.5 rounded-xl bg-[#181a2b] border border-[#282e47] text-white text-sm placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-colors"
-              required
-            />
-          </div>
-
+        <form onSubmit={handleSubmit} className="mt-5 space-y-4">
           {/* Category Picker */}
           <div>
             <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
-              Category
+              Select Category
             </label>
-            <div className="grid grid-cols-5 gap-2">
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
               {categories.map((c) => (
                 <button
                   key={c.key}
                   type="button"
-                  onClick={() => setCategory(c.key)}
+                  onClick={() => handleCategorySelect(c.key)}
                   className={`flex flex-col items-center justify-center py-2 px-1 rounded-xl border text-xs font-bold transition-all ${
                     category === c.key
                       ? 'bg-orange-500/20 border-orange-500 text-orange-400 shadow-md shadow-orange-500/10'
@@ -148,17 +154,52 @@ export const CreateChallengeModal: React.FC<CreateChallengeModalProps> = ({ isOp
             </div>
           </div>
 
-          {/* Description */}
+          {/* Walking Distance Detection Settings if Walking selected */}
+          {category === 'walking' && (
+            <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-emerald-300 flex items-center space-x-1.5">
+                  <Footprints className="w-4 h-4 text-emerald-400" />
+                  <span>Target Distance (Meters)</span>
+                </span>
+                <span className="text-xs font-black text-emerald-400">{walkTargetMeters} Meters (~{Math.round(walkTargetMeters / 0.76)} steps)</span>
+              </div>
+
+              <div className="grid grid-cols-5 gap-1.5">
+                {walkMeterPresets.map((meters) => (
+                  <button
+                    key={meters}
+                    type="button"
+                    onClick={() => handleWalkPreset(meters)}
+                    className={`py-1.5 rounded-lg text-[11px] font-bold border transition-all ${
+                      walkTargetMeters === meters
+                        ? 'bg-emerald-500 text-slate-950 border-emerald-400 shadow-sm'
+                        : 'bg-[#181d2e] border-[#263048] text-slate-300'
+                    }`}
+                  >
+                    {meters >= 1000 ? `${meters / 1000} km` : `${meters}m`}
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex items-center space-x-2 pt-1 text-[11px] text-emerald-200/80">
+                <span>The app will count your physical steps and GPS meters live!</span>
+              </div>
+            </div>
+          )}
+
+          {/* Title */}
           <div>
-            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
-              Requirements / Proof Guidelines
+            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
+              Challenge Title *
             </label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={2}
-              placeholder="What proof must be provided to peers to get verified? (e.g. Strava GPS link, photo of completed notebook, commit URL)"
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="e.g. Walk 500 Meters, Read 20 pages, Gym Workout..."
               className="w-full px-3.5 py-2.5 rounded-xl bg-[#181a2b] border border-[#282e47] text-white text-sm placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-colors"
+              required
             />
           </div>
 
@@ -172,7 +213,6 @@ export const CreateChallengeModal: React.FC<CreateChallengeModalProps> = ({ isOp
               <span className="text-xs font-black text-orange-400">{stakeXp} XP</span>
             </div>
 
-            {/* Presets */}
             <div className="flex items-center gap-2 mb-3">
               {stakePresets.map((preset) => (
                 <button
@@ -190,7 +230,6 @@ export const CreateChallengeModal: React.FC<CreateChallengeModalProps> = ({ isOp
               ))}
             </div>
 
-            {/* Range Slider */}
             <input
               type="range"
               min={25}
@@ -201,8 +240,7 @@ export const CreateChallengeModal: React.FC<CreateChallengeModalProps> = ({ isOp
               className="w-full accent-orange-500 cursor-pointer"
             />
 
-            {/* Multiplier / Risk Summary */}
-            <div className="mt-3 pt-3 border-t border-[#23273e] flex items-center justify-between text-xs">
+            <div className="mt-2.5 pt-2.5 border-t border-[#23273e] flex items-center justify-between text-xs">
               <span className="text-slate-400">Available: <b className="text-white">{currentUser.totalXp} XP</b></span>
               <div className="text-right">
                 <span className="text-slate-400">Streak Multiplier: </span>
@@ -218,15 +256,15 @@ export const CreateChallengeModal: React.FC<CreateChallengeModalProps> = ({ isOp
           <div>
             <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5 flex items-center space-x-1">
               <Clock className="w-3.5 h-3.5 text-blue-400" />
-              <span>Deadline & Auto-Burn Timer</span>
+              <span>Deadline Timer</span>
             </label>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5">
               {deadlinePresets.map((d) => (
                 <button
                   key={d.hours}
                   type="button"
                   onClick={() => setDeadlineHours(d.hours)}
-                  className={`py-2 px-2 rounded-xl text-xs font-bold border transition-all ${
+                  className={`py-1.5 px-2 rounded-xl text-xs font-bold border transition-all ${
                     deadlineHours === d.hours
                       ? 'bg-blue-500/20 border-blue-500 text-blue-300'
                       : 'bg-[#181a2b] border-[#262b42] text-slate-400 hover:bg-[#1f2338]'
@@ -238,37 +276,6 @@ export const CreateChallengeModal: React.FC<CreateChallengeModalProps> = ({ isOp
             </div>
           </div>
 
-          {/* Proof Type */}
-          <div>
-            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
-              Required Proof Format
-            </label>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => setProofType('photo')}
-                className={`py-2 px-3 rounded-xl border text-xs font-bold text-center transition-all ${
-                  proofType === 'photo'
-                    ? 'bg-purple-500/20 border-purple-500 text-purple-300'
-                    : 'bg-[#181a2b] border-[#262b42] text-slate-400 hover:bg-[#1f2338]'
-                }`}
-              >
-                📸 Photo / Screenshot
-              </button>
-              <button
-                type="button"
-                onClick={() => setProofType('checklist')}
-                className={`py-2 px-3 rounded-xl border text-xs font-bold text-center transition-all ${
-                  proofType === 'checklist'
-                    ? 'bg-purple-500/20 border-purple-500 text-purple-300'
-                    : 'bg-[#181a2b] border-[#262b42] text-slate-400 hover:bg-[#1f2338]'
-                }`}
-              >
-                ☑️ Checklist & Note
-              </button>
-            </div>
-          </div>
-
           {/* Group Challenge Toggle */}
           <div className="p-3.5 rounded-2xl bg-[#16182a] border border-[#272c44]">
             <div className="flex items-center justify-between">
@@ -276,7 +283,7 @@ export const CreateChallengeModal: React.FC<CreateChallengeModalProps> = ({ isOp
                 <Users className="w-4 h-4 text-indigo-400" />
                 <div>
                   <h4 className="text-xs font-bold text-slate-200">Group Challenge</h4>
-                  <p className="text-[10px] text-slate-400">Invite peers to lock equal stakes</p>
+                  <p className="text-[10px] text-slate-400">Invite peers to stake together</p>
                 </div>
               </div>
               <input
@@ -289,40 +296,44 @@ export const CreateChallengeModal: React.FC<CreateChallengeModalProps> = ({ isOp
 
             {isGroupChallenge && (
               <div className="mt-3 pt-3 border-t border-[#23273e] space-y-2">
-                <p className="text-[11px] text-slate-400 font-medium">Select Friends to Challenge:</p>
-                <div className="flex flex-wrap gap-2">
-                  {availableFriends.map((f) => {
-                    const isSelected = selectedFriends.includes(f.id);
-                    return (
-                      <button
-                        key={f.id}
-                        type="button"
-                        onClick={() => toggleFriend(f.id)}
-                        className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-xl text-xs font-semibold border transition-all ${
-                          isSelected
-                            ? 'bg-indigo-500/30 border-indigo-400 text-white'
-                            : 'bg-[#1c1f33] border-[#2b314d] text-slate-400 hover:text-white'
-                        }`}
-                      >
-                        <img src={f.avatar} alt={f.name} className="w-4 h-4 rounded-full object-cover" />
-                        <span>{f.name}</span>
-                      </button>
-                    );
-                  })}
-                </div>
+                <p className="text-[11px] text-slate-400 font-medium">Select Friends:</p>
+                {availableFriends.length === 0 ? (
+                  <p className="text-[10px] text-slate-500 italic">No friends added yet. Enter friend email in Friends tab!</p>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {availableFriends.map((f) => {
+                      const isSelected = selectedFriends.includes(f.id);
+                      return (
+                        <button
+                          key={f.id}
+                          type="button"
+                          onClick={() => toggleFriend(f.id)}
+                          className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-xl text-xs font-semibold border transition-all ${
+                            isSelected
+                              ? 'bg-indigo-500/30 border-indigo-400 text-white'
+                              : 'bg-[#1c1f33] border-[#2b314d] text-slate-400 hover:text-white'
+                          }`}
+                        >
+                          <img src={f.avatar} alt={f.name} className="w-4 h-4 rounded-full object-cover" />
+                          <span>{f.name}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             )}
           </div>
 
-          {/* Punishment Warning Banner */}
+          {/* Punishment Warning */}
           <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/25 flex items-start space-x-2 text-xs text-red-300">
             <ShieldAlert className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
             <p className="leading-snug">
-              <b>Accountability Rule:</b> If you miss the deadline or your proof is rejected by a peer, your <b>{stakeXp} XP stake will be incinerated</b> and your streak will reset to 0!
+              <b>Accountability Rule:</b> If you miss the deadline, your <b>{stakeXp} XP stake will be incinerated</b> and your streak will reset to 0!
             </p>
           </div>
 
-          {/* Submit Button */}
+          {/* Submit */}
           <button
             type="submit"
             className="w-full flex items-center justify-center space-x-2 py-3 rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-red-600 hover:from-orange-400 hover:to-red-500 text-white text-sm font-extrabold shadow-xl shadow-orange-600/30 active:scale-95 transition-all"

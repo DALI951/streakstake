@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ChallengeProvider, useChallenges } from './context/ChallengeContext';
 import { Navbar } from './components/Navbar';
@@ -7,38 +7,71 @@ import { ChallengeCard } from './components/ChallengeCard';
 import { CreateChallengeModal } from './components/CreateChallengeModal';
 import { ProofModal } from './components/ProofModal';
 import { VerifyModal } from './components/VerifyModal';
+import { WalkTrackerModal } from './components/WalkTrackerModal';
 import { SocialFeed } from './components/SocialFeed';
 import { FriendsView } from './components/FriendsView';
 import { LeaderboardView } from './components/LeaderboardView';
 import { BadgesView } from './components/BadgesView';
 import { NotificationCenter } from './components/NotificationCenter';
+import { UpdateModal } from './components/UpdateModal';
+import { AuthScreen } from './components/AuthScreen';
+import { checkGitHubRelease, ReleaseInfo } from './services/updateService';
 import { Challenge } from './types/challenge';
-import { Flame, ShieldAlert, Plus, Sparkles, Filter } from 'lucide-react';
+import { Flame, ShieldAlert, Plus, Filter, Sparkles, Download, ArrowUpCircle, Footprints } from 'lucide-react';
 
 const MainArena: React.FC = () => {
-  const { currentUser } = useAuth();
+  const { currentUser, loadingAuth } = useAuth();
   const { challenges } = useChallenges();
 
   const [activeTab, setActiveTab] = useState<'challenges' | 'friends' | 'leaderboard' | 'badges'>('challenges');
-  const [challengeFilter, setChallengeFilter] = useState<'all' | 'mine' | 'pending' | 'group'>('all');
+  const [challengeFilter, setChallengeFilter] = useState<'all' | 'mine' | 'walking' | 'pending'>('all');
 
   // Modals state
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [isUpdateOpen, setIsUpdateOpen] = useState(false);
+  const [updateInfo, setUpdateInfo] = useState<ReleaseInfo | null>(null);
+
   const [proofTarget, setProofTarget] = useState<Challenge | null>(null);
   const [verifyTarget, setVerifyTarget] = useState<Challenge | null>(null);
   const [readOnlyTarget, setReadOnlyTarget] = useState<Challenge | null>(null);
+  const [walkTarget, setWalkTarget] = useState<Challenge | null>(null);
+
+  // Silent GitHub Release check on startup
+  useEffect(() => {
+    checkGitHubRelease().then((info) => {
+      setUpdateInfo(info);
+    }).catch(() => {});
+  }, []);
+
+  // Show AuthScreen if user is not signed in
+  if (loadingAuth) {
+    return (
+      <div className="min-h-screen bg-[#090b12] flex items-center justify-center">
+        <div className="flex flex-col items-center space-y-3">
+          <div className="w-12 h-12 rounded-2xl overflow-hidden ring-2 ring-orange-500/40 animate-pulse">
+            <img src="/streakstake-icon.png" alt="Loading" className="w-full h-full object-cover" />
+          </div>
+          <span className="text-xs font-bold text-orange-400">Loading StreakStake...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!currentUser) {
+    return <AuthScreen />;
+  }
 
   // Filtered challenges list
   const filteredChallenges = challenges.filter((c) => {
     if (challengeFilter === 'mine') {
       return c.creatorId === currentUser.id;
     }
+    if (challengeFilter === 'walking') {
+      return c.category === 'walking' || c.proofType === 'pedometer';
+    }
     if (challengeFilter === 'pending') {
       return c.status === 'pending_verification';
-    }
-    if (challengeFilter === 'group') {
-      return c.isGroupChallenge;
     }
     return true;
   });
@@ -66,10 +99,42 @@ const MainArena: React.FC = () => {
         setActiveTab={setActiveTab}
         openCreateModal={() => setIsCreateOpen(true)}
         openNotificationDrawer={() => setIsNotifOpen(true)}
+        openUpdateModal={() => setIsUpdateOpen(true)}
+        hasUpdateAvailable={Boolean(updateInfo?.hasUpdate)}
       />
 
       {/* Main Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
+        {/* Dynamic Update Alert Banner if new release exists on GitHub */}
+        {updateInfo?.hasUpdate && (
+          <div className="p-4 rounded-3xl bg-gradient-to-r from-orange-500/20 via-amber-500/15 to-red-500/20 border border-orange-500/40 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xl shadow-orange-500/10">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 rounded-xl bg-orange-500/30 text-orange-400">
+                <Sparkles className="w-5 h-5 animate-pulse" />
+              </div>
+              <div>
+                <h4 className="text-xs font-black text-white flex items-center space-x-2">
+                  <span>StreakStake {updateInfo.version} is available!</span>
+                  <span className="text-[10px] px-2 py-0.2 rounded-full bg-orange-500 text-white font-extrabold uppercase">
+                    Update
+                  </span>
+                </h4>
+                <p className="text-[11px] text-slate-300">
+                  New Android APK build ready with latest walking step detection.
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setIsUpdateOpen(true)}
+              className="flex items-center justify-center space-x-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white text-xs font-black shadow-md shadow-orange-500/20 active:scale-95 transition-all"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Install APK</span>
+            </button>
+          </div>
+        )}
+
         {/* Banner with XP, Streak Multipliers & Win Rate */}
         <StatsBanner />
 
@@ -85,8 +150,8 @@ const MainArena: React.FC = () => {
                   {[
                     { id: 'all', label: 'All Arena' },
                     { id: 'mine', label: 'My Stakes' },
-                    { id: 'pending', label: 'Pending Review' },
-                    { id: 'group', label: 'Group Battles' }
+                    { id: 'walking', label: 'Walk Tracks 🚶' },
+                    { id: 'pending', label: 'Pending Review' }
                   ].map((f) => (
                     <button
                       key={f.id}
@@ -117,16 +182,16 @@ const MainArena: React.FC = () => {
                   <div className="inline-flex p-3 rounded-2xl bg-orange-500/10 text-orange-400 border border-orange-500/20">
                     <Flame className="w-8 h-8" />
                   </div>
-                  <h3 className="text-base font-black text-white">No active challenges found</h3>
+                  <h3 className="text-base font-black text-white">Your Arena is Fresh</h3>
                   <p className="text-xs text-slate-400 max-w-sm mx-auto">
-                    Stake your XP on your habits, workouts, or study goals to trigger streak multipliers!
+                    Stake your XP on a walk target (e.g. 500 meters) or habit challenge to start earning streak multipliers!
                   </p>
                   <button
                     onClick={() => setIsCreateOpen(true)}
                     className="inline-flex items-center space-x-1.5 px-4 py-2 rounded-xl bg-orange-500 hover:bg-orange-400 text-white text-xs font-bold shadow-lg shadow-orange-500/25 transition-all"
                   >
                     <Plus className="w-4 h-4" />
-                    <span>Stake Challenge Now</span>
+                    <span>Stake First Challenge</span>
                   </button>
                 </div>
               ) : (
@@ -138,6 +203,7 @@ const MainArena: React.FC = () => {
                       onSubmitProof={(c) => setProofTarget(c)}
                       onVerifyProof={(c) => setVerifyTarget(c)}
                       onViewProof={(c) => setReadOnlyTarget(c)}
+                      onStartWalk={(c) => setWalkTarget(c)}
                     />
                   ))}
                 </div>
@@ -148,25 +214,17 @@ const MainArena: React.FC = () => {
             <div className="lg:col-span-5 space-y-4">
               <SocialFeed />
 
-              {/* Peer Verification Explainer Card */}
-              <div className="p-5 rounded-3xl bg-gradient-to-br from-[#16182a] to-[#121422] border border-[#262b42] shadow-xl">
+              {/* Live Step Tracking Explainer */}
+              <div className="p-5 rounded-3xl bg-gradient-to-br from-[#16182a] to-[#121422] border border-[#262b42] shadow-xl space-y-2">
                 <div className="flex items-center space-x-2">
-                  <ShieldAlert className="w-4 h-4 text-orange-400" />
+                  <Footprints className="w-4 h-4 text-emerald-400" />
                   <h4 className="text-xs font-black text-white uppercase tracking-wider">
-                    How Proof Verification Works
+                    Walk Distance & Step Detection
                   </h4>
                 </div>
-                <div className="mt-3 space-y-2 text-xs text-slate-300 leading-relaxed font-medium">
-                  <p>
-                    <b>1. Lock Stake:</b> Put your XP on the line before the countdown starts.
-                  </p>
-                  <p>
-                    <b>2. Peer Check:</b> Complete the task and upload photo proof. It stays <i>Pending</i>.
-                  </p>
-                  <p>
-                    <b>3. Proof or Burn:</b> A friend must tap <i>Verify</i>. Verified wins release the stake + <b>multiplier bonus</b>; rejected or lapsed proofs burn your XP permanently!
-                  </p>
-                </div>
+                <p className="text-xs text-slate-300 leading-relaxed font-medium">
+                  Set a distance in meters (e.g. 500m). When you walk, StreakStake's accelerometer sensor counts your physical steps and GPS records your actual distance. Once completed, your proof telemetry is automatically verified for friends to approve!
+                </p>
               </div>
             </div>
           </div>
@@ -192,9 +250,15 @@ const MainArena: React.FC = () => {
             <span>• Peer Verification & XP Staking Accountability</span>
           </div>
           <div className="flex items-center space-x-4 text-[11px]">
-            <span>Cross-Platform Ready</span>
-            <span>Android APK Build Pipeline</span>
-            <span>Automated Cron Punishments</span>
+            <button
+              onClick={() => setIsUpdateOpen(true)}
+              className="flex items-center space-x-1 text-slate-400 hover:text-white transition-colors"
+            >
+              <ArrowUpCircle className="w-3.5 h-3.5 text-orange-400" />
+              <span>GitHub OTA Updater</span>
+            </button>
+            <span>Firebase Synced</span>
+            <span>Step Detector Active</span>
           </div>
         </div>
       </footer>
@@ -221,10 +285,22 @@ const MainArena: React.FC = () => {
         isReadOnly={true}
       />
 
+      <WalkTrackerModal
+        challenge={walkTarget}
+        isOpen={Boolean(walkTarget)}
+        onClose={() => setWalkTarget(null)}
+      />
+
       <NotificationCenter
         isOpen={isNotifOpen}
         onClose={() => setIsNotifOpen(false)}
         onSelectChallenge={handleSelectChallengeFromNotif}
+      />
+
+      <UpdateModal
+        isOpen={isUpdateOpen}
+        onClose={() => setIsUpdateOpen(false)}
+        onUpdateAvailableFound={(info) => setUpdateInfo(info)}
       />
     </div>
   );
