@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Strict Minimalist Two-Color Design System -->
+    <!-- Color 1: Primary Radiant Accent -->
+    <color name="brand_orange">#FF5500</color>
+    <color name="brand_orange_light">#FF7722</color>
+    <color name="brand_orange_dim">#33FF5500</color>
+
+    <!-- Color 2: Deep Dark Background & Slate Surfaces -->
+    <color name="bg_black">#0A0B10</color>
+    <color name="surface_dark">#141622</color>
+    <color name="surface_dark_card">#1B1E2E</color>
+    <color name="border_dark">#282D42</color>
+
+    <!-- Monochrome Text -->
+    <color name="text_white">#FFFFFF</color>
+    <color name="text_gray">#8E94A5</color>
+    <color name="text_muted">#555B6E</color>
+</resources>

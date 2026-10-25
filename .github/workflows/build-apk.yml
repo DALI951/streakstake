@@ -1,4 +1,4 @@
-name: Build & Release Android APK
+name: Build & Release Native Android APK
 
 on:
   push:
@@ -12,27 +12,12 @@ permissions:
 
 jobs:
   build:
-    name: Build Android APK & Release
+    name: Build Native Android APK & Release
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci || npm install
-
-      - name: Build web assets
-        run: npm run build
-
-      - name: Sync Capacitor Android
-        run: npx cap sync android
 
       - name: Set up Java JDK 21
         uses: actions/setup-java@v4
@@ -41,21 +26,20 @@ jobs:
           java-version: '21'
 
       - name: Grant execute permission for gradlew
-        run: chmod +x android/gradlew
+        run: chmod +x gradlew
 
-      - name: Build Android Debug APK
-        working-directory: android
+      - name: Build Native Android APK
         run: ./gradlew assembleDebug --no-daemon --stacktrace
 
       - name: Prepare APK binary for release
         run: |
           mkdir -p release-artifacts
-          cp android/app/build/outputs/apk/debug/app-debug.apk release-artifacts/StreakStake.apk
+          cp app/build/outputs/apk/debug/app-debug.apk release-artifacts/StreakStake.apk
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: StreakStake-Android-APK
+          name: StreakStake-Native-APK
           path: release-artifacts/StreakStake.apk
           retention-days: 14
 
@@ -63,24 +47,24 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
         with:
-          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v1.1.0' }}
-          name: StreakStake Android Release ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v1.1.0' }}
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v2.0.0' }}
+          name: StreakStake Native Android Release ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v2.0.0' }}
           draft: false
           prerelease: false
           files: release-artifacts/StreakStake.apk
           body: |
-            ## 🔥 StreakStake v1.1.0 Android Release
-            
-            Download the official **StreakStake APK** directly onto your Android device.
+            ## 📱 StreakStake v2.0.0 - 100% Native Android
 
-            ### 📱 Direct Download
-            - **Binary:** [`StreakStake.apk`](https://github.com/DALI951/streakstake/releases/download/v1.1.0/StreakStake.apk)
+            Completely rebuilt from the ground up as a pure native Android application (Kotlin & Gradle). Zero TypeScript, zero web views, zero bloat.
 
-            ### 🌟 New Features in v1.1.0:
-            - 🚶 **Live Walk Distance & Step Detection:** Set walking target (e.g. 500 meters) and track real-time physical steps via accelerometer motion peaks and GPS distance telemetry.
-            - 🔐 **Real Firebase Auth & Zero Bloat:** Requires clean sign in at launch with Google or Email. No dummy clutter. Starter 500 XP granted on registration.
-            - 🎨 **Unique 3D App Icon:** Custom-designed energetic neon flame 'S' crest and launcher icons.
-            - 🔄 **In-App GitHub OTA Updater:** Check releases and install updates directly from within the app.
-            - 🛡️ **Peer Proof-or-Burn:** Mandatory friend verification with Arbiter bonuses.
+            ### 🚀 Direct Download
+            - **APK Binary:** [`StreakStake.apk`](https://github.com/DALI951/streakstake/releases/download/v2.0.0/StreakStake.apk)
+
+            ### 🌟 Key Native Features:
+            - 🎯 **100% Native Android:** Built in Kotlin with native XML view layouts. Adapts perfectly to any Android screen resolution, notch, and DPI.
+            - 🎨 **Minimalist Two-Color Design:** Pitch Black (`#0A0B10`) and Flame Orange (`#FF5500`). Zero clutter.
+            - 🔐 **Authentication First:** Starts cleanly on the Sign In / Sign Up screen. Zero fake seed challenges or dummy clutter. Grants 500 XP starter balance.
+            - 🚶 **Hardware Step & Walking Meter Detector:** Uses Android's `SensorManager` (hardware step detector + accelerometer peak filter) and GPS location to track exact meters walked in real time.
+            - 🔥 **Streak Multipliers & XP Staking:** Put 50, 100, or 200 XP on the line before starting. Hit goals to win your stake plus 1.5x payout!
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">StreakStake</string>
+    <string name="title_sign_in">Sign In to StreakStake</string>
+    <string name="title_walk_tracker">Walking Distance Tracker</string>
+</resources>
