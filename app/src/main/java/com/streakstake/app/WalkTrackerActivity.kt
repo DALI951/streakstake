@@ -1,8 +1,11 @@
 package com.streakstake.app
 
 import android.Manifest
+import android.app.AlertDialog
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -16,12 +19,19 @@ import android.os.Handler
 import android.os.Looper
 import android.os.Vibrator
 import android.os.VibrationEffect
+import android.view.LayoutInflater
+import android.widget.Button
+import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.streakstake.app.data.AppPreferences
 import com.streakstake.app.databinding.ActivityWalkTrackerBinding
+import com.streakstake.app.models.SocialFeedItem
 import com.streakstake.app.models.Stake
+import com.streakstake.app.models.StakeStatus
+import java.util.UUID
 import kotlin.math.sqrt
 
 class WalkTrackerActivity : AppCompatActivity(), SensorEventListener, LocationListener {
@@ -84,9 +94,7 @@ class WalkTrackerActivity : AppCompatActivity(), SensorEventListener, LocationLi
     private fun initSensors() {
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
 
-        // Hardware step detector
         stepDetectorSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR)
-        // Accelerometer fallback for all devices
         accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
 
         if (stepDetectorSensor != null) {
@@ -96,38 +104,48 @@ class WalkTrackerActivity : AppCompatActivity(), SensorEventListener, LocationLi
             sensorManager.registerListener(this, accelerometerSensor, SensorManager.SENSOR_DELAY_UI)
         }
 
-        // Request Activity Recognition and Location permissions if needed
         checkPermissionsAndStartGps()
     }
 
     private fun checkPermissionsAndStartGps() {
         val permissions = mutableListOf<String>()
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            permissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
-        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACTIVITY_RECOGNITION) != PackageManager.PERMISSION_GRANTED) {
                 permissions.add(Manifest.permission.ACTIVITY_RECOGNITION)
             }
         }
 
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            permissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
+        }
+
         if (permissions.isNotEmpty()) {
-            ActivityCompat.requestPermissions(this, permissions.toTypedArray(), 101)
+            ActivityCompat.requestPermissions(this, permissions.toTypedArray(), 1001)
         } else {
-            startGpsUpdates()
+            startGpsTracking()
         }
     }
 
-    private fun startGpsUpdates() {
+    private fun startGpsTracking() {
         try {
-            locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-            if (locationManager?.isProviderEnabled(LocationManager.GPS_PROVIDER) == true) {
-                locationManager?.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000L, 1.0f, this)
-            } else if (locationManager?.isProviderEnabled(LocationManager.NETWORK_PROVIDER) == true) {
-                locationManager?.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000L, 1.0f, this)
+            locationManager = getSystemService(Context.LOCATION_SERVICE) as? LocationManager
+            locationManager?.let { lm ->
+                if (lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                    lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000L, 2f, this)
+                } else if (lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+                    lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 2000L, 2f, this)
+                }
             }
         } catch (e: SecurityException) {
-            // Location permission not granted, accelerometer step detection remains active
+            // Handled gracefully
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 1001) {
+            startGpsTracking()
         }
     }
 
@@ -136,59 +154,68 @@ class WalkTrackerActivity : AppCompatActivity(), SensorEventListener, LocationLi
 
         if (event.sensor.type == Sensor.TYPE_STEP_DETECTOR) {
             onStepDetected()
-        } else if (event.sensor.type == Sensor.TYPE_ACCELEROMETER) {
-            // Accelerometer peak detection algorithm
+        } else if (event.sensor.type == Sensor.TYPE_ACCELEROMETER && stepDetectorSensor == null) {
             val x = event.values[0]
             val y = event.values[1]
             val z = event.values[2]
             val magnitude = sqrt((x * x + y * y + z * z).toDouble())
-            val now = System.currentTimeMillis()
+            val delta = magnitude - lastMagnitude
+            lastMagnitude = magnitude
 
-            if (magnitude > 11.2 && lastMagnitude <= 11.2 && (now - lastStepTime) > 260) {
+            val now = System.currentTimeMillis()
+            if (delta > 2.5 && magnitude > 11.2 && (now - lastStepTime > 260)) {
                 lastStepTime = now
                 onStepDetected()
             }
-            lastMagnitude = magnitude
         }
     }
 
     private fun onStepDetected() {
         stepsCount++
-        // Stride calculation: ~0.76 meters per step
-        val stepDistance = (stepsCount * 0.76).toInt()
-        currentMeters = maxOf(stepDistance, gpsMetersTraversed.toInt())
-        updateUiMetrics()
+        // Average human step length is ~0.762 meters
+        val sensorMeters = (stepsCount * 0.762).toInt()
+        val calculatedMeters = maxOf(sensorMeters, gpsMetersTraversed.toInt())
+        currentMeters = calculatedMeters
 
-        if (stepsCount % 15 == 0) {
-            vibrate(20L)
+        runOnUiThread {
+            binding.tvStepsCount.text = stepsCount.toString()
+            binding.tvMetersCurrent.text = currentMeters.toString()
+
+            val progress = ((currentMeters.toFloat() / targetMeters.toFloat()) * 100).toInt().coerceIn(0, 100)
+            binding.pbWalk.progress = progress
+
+            if (currentMeters >= targetMeters && !binding.btnCompleteWalk.isEnabled) {
+                binding.btnCompleteWalk.isEnabled = true
+                binding.btnCompleteWalk.text = "VERIFY & CLAIM REWARD ($currentMeters m)"
+                vibrate(300)
+            }
         }
     }
 
     override fun onLocationChanged(location: Location) {
         if (!isTracking) return
-        lastGpsLocation?.let { prev ->
-            val distance = prev.distanceTo(location)
-            if (distance in 1.0..30.0) {
-                gpsMetersTraversed += distance
-                currentMeters = maxOf(currentMeters, gpsMetersTraversed.toInt())
-                updateUiMetrics()
+        val last = lastGpsLocation
+        if (last != null && location.accuracy < 25) {
+            val dist = last.distanceTo(location)
+            if (dist in 1.0..10.0) { // filter out GPS jumps
+                gpsMetersTraversed += dist
+                val calculatedMeters = maxOf((stepsCount * 0.762).toInt(), gpsMetersTraversed.toInt())
+                currentMeters = calculatedMeters
+
+                runOnUiThread {
+                    binding.tvMetersCurrent.text = currentMeters.toString()
+                    val progress = ((currentMeters.toFloat() / targetMeters.toFloat()) * 100).toInt().coerceIn(0, 100)
+                    binding.pbWalk.progress = progress
+
+                    if (currentMeters >= targetMeters && !binding.btnCompleteWalk.isEnabled) {
+                        binding.btnCompleteWalk.isEnabled = true
+                        binding.btnCompleteWalk.text = "VERIFY & CLAIM REWARD ($currentMeters m)"
+                        vibrate(300)
+                    }
+                }
             }
         }
         lastGpsLocation = location
-    }
-
-    private fun updateUiMetrics() {
-        binding.tvMetersCurrent.text = currentMeters.toString()
-        binding.tvStepsCount.text = stepsCount.toString()
-
-        val progress = if (targetMeters > 0) ((currentMeters.toFloat() / targetMeters) * 100).toInt() else 0
-        binding.pbWalk.progress = progress.coerceAtMost(100)
-
-        if (currentMeters >= targetMeters) {
-            binding.btnCompleteWalk.isEnabled = true
-            binding.tvSensorStatus.text = "★ TARGET REACHED! Tap to claim XP"
-            vibrate(100L)
-        }
     }
 
     private fun setupListeners() {
@@ -197,13 +224,12 @@ class WalkTrackerActivity : AppCompatActivity(), SensorEventListener, LocationLi
         }
 
         binding.btnSimulateSteps.setOnClickListener {
-            // Simulator adds 50 steps (~38 meters)
             repeat(50) { onStepDetected() }
             Toast.makeText(this, "+50 Steps Simulated (~38m)", Toast.LENGTH_SHORT).show()
         }
 
         binding.btnCompleteWalk.setOnClickListener {
-            completeChallengeAndClaimReward()
+            showProofSubmissionDialog()
         }
 
         binding.btnGiveUp.setOnClickListener {
@@ -211,12 +237,71 @@ class WalkTrackerActivity : AppCompatActivity(), SensorEventListener, LocationLi
         }
     }
 
-    private fun completeChallengeAndClaimReward() {
+    private fun showProofSubmissionDialog() {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_submit_proof, null)
+        val tvMetrics = dialogView.findViewById<TextView>(R.id.tvProofMetrics)
+        val etNote = dialogView.findViewById<EditText>(R.id.etProofNote)
+        val btnSubmitToPeers = dialogView.findViewById<Button>(R.id.btnSubmitToPeers)
+        val btnClaimSolo = dialogView.findViewById<Button>(R.id.btnClaimSolo)
+
+        tvMetrics.text = "${currentMeters}m Walk Completed ($stepsCount Steps)"
+
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(true)
+            .create()
+
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+        btnSubmitToPeers.setOnClickListener {
+            val note = etNote.text.toString().trim()
+            submitToPeersForVerification(note)
+            dialog.dismiss()
+        }
+
+        btnClaimSolo.setOnClickListener {
+            completeInstantSolo()
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+    private fun submitToPeersForVerification(note: String) {
+        val user = prefs.getCurrentUser() ?: return
+        val currentStake = stake ?: return
+
+        currentStake.status = StakeStatus.PENDING_VERIFICATION
+        currentStake.currentMeters = currentMeters
+        currentStake.stepsCount = stepsCount
+        currentStake.proofNote = if (note.isNotEmpty()) note else "Walk completed verified via native step detector"
+        currentStake.completedAt = System.currentTimeMillis()
+
+        prefs.updateStake(currentStake)
+        prefs.addPeerPendingStake(currentStake)
+
+        // Add to social feed
+        prefs.addSocialFeedItem(
+            SocialFeedItem(
+                id = "feed_" + UUID.randomUUID().toString().take(8),
+                userId = user.id,
+                userName = user.name,
+                actionType = "PROOF_SUBMITTED",
+                description = "Completed '${currentStake.title}' ($currentMeters m). Proof submitted to Peer Queue for verification!",
+                xpAmount = currentStake.stakeXp
+            )
+        )
+
+        Toast.makeText(this, "Proof locked in escrow! Awaiting friend verification.", Toast.LENGTH_LONG).show()
+        finish()
+    }
+
+    private fun completeInstantSolo() {
         val user = prefs.getCurrentUser() ?: return
         val currentStake = stake
 
         val stakeXp = currentStake?.stakeXp ?: 100
-        val bonus = (stakeXp * 0.5).toInt() // 1.5x multiplier
+        val bonus = (stakeXp * 0.5).toInt()
         val totalReward = stakeXp + bonus
 
         user.totalXp += totalReward
@@ -226,11 +311,23 @@ class WalkTrackerActivity : AppCompatActivity(), SensorEventListener, LocationLi
         prefs.saveCurrentUser(user)
 
         currentStake?.let {
-            it.isCompleted = true
+            it.status = StakeStatus.VERIFIED
             it.currentMeters = currentMeters
             it.stepsCount = stepsCount
+            it.completedAt = System.currentTimeMillis()
             prefs.updateStake(it)
         }
+
+        prefs.addSocialFeedItem(
+            SocialFeedItem(
+                id = "feed_" + UUID.randomUUID().toString().take(8),
+                userId = user.id,
+                userName = user.name,
+                actionType = "STAKE_VERIFIED",
+                description = "Completed '${currentStake?.title}' ($currentMeters m) +$totalReward XP awarded!",
+                xpAmount = totalReward
+            )
+        )
 
         Toast.makeText(this, "Target Achieved! +$totalReward XP awarded! Streak: ${user.currentStreak}", Toast.LENGTH_LONG).show()
         finish()
@@ -246,9 +343,20 @@ class WalkTrackerActivity : AppCompatActivity(), SensorEventListener, LocationLi
         prefs.saveCurrentUser(user)
 
         currentStake?.let {
-            it.isBurned = true
+            it.status = StakeStatus.BURNED
             prefs.updateStake(it)
         }
+
+        prefs.addSocialFeedItem(
+            SocialFeedItem(
+                id = "feed_" + UUID.randomUUID().toString().take(8),
+                userId = user.id,
+                userName = user.name,
+                actionType = "STAKE_BURNED",
+                description = "Forfeited '${currentStake?.title}'. Lost $stakeXp XP & streak reset to 0.",
+                xpAmount = stakeXp
+            )
+        )
 
         Toast.makeText(this, "Stake Burned: $stakeXp XP lost & streak reset to 0.", Toast.LENGTH_SHORT).show()
         finish()

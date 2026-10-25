@@ -47,24 +47,26 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
         with:
-          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v2.0.0' }}
-          name: StreakStake Native Android Release ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v2.0.0' }}
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v2.1.0' }}
+          name: StreakStake Native Android Release ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v2.1.0' }}
           draft: false
           prerelease: false
           files: release-artifacts/StreakStake.apk
           body: |
-            ## 📱 StreakStake v2.0.0 - 100% Native Android
+            ## 📱 StreakStake v2.1.0 - Native Social Accountability & In-App Updater
 
-            Completely rebuilt from the ground up as a pure native Android application (Kotlin & Gradle). Zero TypeScript, zero web views, zero bloat.
+            Completely rebuilt as a 100% Native Android application (Kotlin & Gradle). Zero TypeScript, zero web views, zero bloat.
 
             ### 🚀 Direct Download
-            - **APK Binary:** [`StreakStake.apk`](https://github.com/DALI951/streakstake/releases/download/v2.0.0/StreakStake.apk)
+            - **APK Binary:** [`StreakStake.apk`](https://github.com/DALI951/streakstake/releases/download/v2.1.0/StreakStake.apk)
 
-            ### 🌟 Key Native Features:
-            - 🎯 **100% Native Android:** Built in Kotlin with native XML view layouts. Adapts perfectly to any Android screen resolution, notch, and DPI.
-            - 🎨 **Minimalist Two-Color Design:** Pitch Black (`#0A0B10`) and Flame Orange (`#FF5500`). Zero clutter.
-            - 🔐 **Authentication First:** Starts cleanly on the Sign In / Sign Up screen. Zero fake seed challenges or dummy clutter. Grants 500 XP starter balance.
-            - 🚶 **Hardware Step & Walking Meter Detector:** Uses Android's `SensorManager` (hardware step detector + accelerometer peak filter) and GPS location to track exact meters walked in real time.
-            - 🔥 **Streak Multipliers & XP Staking:** Put 50, 100, or 200 XP on the line before starting. Hit goals to win your stake plus 1.5x payout!
+            ### 🌟 Key Features:
+            - ⚡ **In-App GitHub Auto-Updater:** Checks GitHub Releases directly inside the app, downloads the APK, and prompts native Android package installation with one tap.
+            - ⚖️ **Peer Verification System ("Proof or Burn"):** Staked XP remains locked in escrow until friends review proof (steps/distance/notes) and tap "Verify" (+1.5x reward) or "Burn" (XP forfeited, streak reset).
+            - 🔥 **Live Social Dashboard:** Real-time activity feed showing friend stakes, verifications, and streak milestones without page refresh.
+            - 🏆 **Friends & Leaderboard:** Search & add friends via @username or email; live weekly rankings by XP balance and active streaks.
+            - 🚶 **Hardware Step & GPS Meter Detection:** Real-time sensor counting (`SensorManager` step detector + accelerometer peak filtering + GPS meter calculations).
+            - 🎨 **Minimalist Two-Color Design:** Pitch Black (`#0A0B10`) & Flame Orange (`#FF5500`) with zero bloat.
+            - 🔐 **Authentication First:** Clean Sign-In screen with starter 500 XP grant.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

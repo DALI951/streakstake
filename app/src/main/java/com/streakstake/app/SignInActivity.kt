@@ -86,10 +86,13 @@ class SignInActivity : AppCompatActivity() {
             email.substringBefore("@").replaceFirstChar { it.uppercase() }
         }
 
+        val username = "@" + name.lowercase().replace(" ", "_")
+
         val user = User(
             id = "user_" + UUID.randomUUID().toString().take(8),
             name = name,
             email = email,
+            username = username,
             totalXp = 500,
             currentStreak = 0,
             bestStreak = 0,
@@ -98,15 +101,17 @@ class SignInActivity : AppCompatActivity() {
         )
 
         prefs.saveCurrentUser(user)
-        Toast.makeText(this, "Welcome, ${user.name}! 500 XP granted.", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "Welcome, $name! 500 XP starter grant added.", Toast.LENGTH_SHORT).show()
         navigateToMain()
     }
 
     private fun handleGoogleAuth() {
-        val googleUser = User(
-            id = "google_" + UUID.randomUUID().toString().take(8),
-            name = "Google Challenger",
+        // Authenticate with Google
+        val user = User(
+            id = "g_user_" + UUID.randomUUID().toString().take(8),
+            name = "Challenger",
             email = "challenger@gmail.com",
+            username = "@challenger",
             totalXp = 500,
             currentStreak = 0,
             bestStreak = 0,
@@ -114,8 +119,8 @@ class SignInActivity : AppCompatActivity() {
             challengesFailed = 0
         )
 
-        prefs.saveCurrentUser(googleUser)
-        Toast.makeText(this, "Connected via Google! 500 XP granted.", Toast.LENGTH_SHORT).show()
+        prefs.saveCurrentUser(user)
+        Toast.makeText(this, "Signed in with Google! 500 XP granted.", Toast.LENGTH_SHORT).show()
         navigateToMain()
     }
 

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    android:background="@drawable/bg_card_dark"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Peer challenger info -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/btn_orange_rounded"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="2dp"
+            android:text="PENDING PROOF"
+            android:textColor="@color/bg_black"
+            android:textSize="9sp"
+            android:textStyle="bold" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <TextView
+            android:id="@+id/tvVerifyStakeXp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-black"
+            android:text="100 XP Staked"
+            android:textColor="@color/brand_orange"
+            android:textSize="13sp" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvVerifyUser"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:fontFamily="sans-serif-black"
+        android:text="Challenger"
+        android:textColor="@color/text_white"
+        android:textSize="15sp" />
+
+    <TextView
+        android:id="@+id/tvVerifyMetrics"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:text="500m Walk Target • 650 Steps recorded"
+        android:textColor="@color/brand_orange"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/tvVerifyNote"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="Proof Note: Completed outside around track."
+        android:textColor="@color/text_gray"
+        android:textSize="12sp" />
+
+    <!-- Peer Action Buttons: Verify (Approve) or Burn (Reject) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnVerifyApprove"
+            android:layout_width="0dp"
+            android:layout_height="42dp"
+            android:layout_marginEnd="6dp"
+            android:layout_weight="1.2"
+            android:background="@drawable/btn_orange_rounded"
+            android:fontFamily="sans-serif-bold"
+            android:text="✓ VERIFY PROOF"
+            android:textColor="@color/bg_black"
+            android:textSize="11sp"
+            app:backgroundTint="@null" />
+
+        <Button
+            android:id="@+id/btnVerifyReject"
+            android:layout_width="0dp"
+            android:layout_height="42dp"
+            android:layout_marginStart="6dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_input_field"
+            android:fontFamily="sans-serif-medium"
+            android:text="✕ REJECT / BURN"
+            android:textColor="@color/text_gray"
+            android:textSize="11sp"
+            app:backgroundTint="@null" />
+    </LinearLayout>
+
+</LinearLayout>
