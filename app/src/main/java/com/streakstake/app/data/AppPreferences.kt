@@ -21,6 +21,9 @@ class AppPreferences(context: Context) {
         private const val KEY_PEER_STAKES = "peer_pending_stakes"
         private const val KEY_SOCIAL_FEED = "social_feed"
         private const val KEY_FRIENDS = "friends_list"
+        private const val KEY_GPS_ENABLED = "setting_gps_enabled"
+        private const val KEY_HAPTIC_ENABLED = "setting_haptic_enabled"
+        private const val KEY_AUTO_UPDATE_ENABLED = "setting_auto_update"
     }
 
     // --- User Session ---
@@ -39,6 +42,44 @@ class AppPreferences(context: Context) {
         } else {
             prefs.edit().putString(KEY_CURRENT_USER, gson.toJson(user)).apply()
         }
+    }
+
+    fun updateAccountDetails(name: String, username: String) {
+        val user = getCurrentUser() ?: return
+        val updated = user.copy(
+            name = name,
+            username = if (username.startsWith("@")) username else "@$username"
+        )
+        saveCurrentUser(updated)
+    }
+
+    // --- Settings Preferences ---
+    fun isGpsEnabled(): Boolean = prefs.getBoolean(KEY_GPS_ENABLED, true)
+    fun setGpsEnabled(enabled: Boolean) = prefs.edit().putBoolean(KEY_GPS_ENABLED, enabled).apply()
+
+    fun isHapticEnabled(): Boolean = prefs.getBoolean(KEY_HAPTIC_ENABLED, true)
+    fun setHapticEnabled(enabled: Boolean) = prefs.edit().putBoolean(KEY_HAPTIC_ENABLED, enabled).apply()
+
+    fun isAutoUpdateEnabled(): Boolean = prefs.getBoolean(KEY_AUTO_UPDATE_ENABLED, true)
+    fun setAutoUpdateEnabled(enabled: Boolean) = prefs.edit().putBoolean(KEY_AUTO_UPDATE_ENABLED, enabled).apply()
+
+    fun resetAccountData() {
+        val user = getCurrentUser()
+        if (user != null) {
+            val freshUser = user.copy(
+                totalXp = 500,
+                currentStreak = 0,
+                bestStreak = 0,
+                challengesCompleted = 0,
+                challengesFailed = 0
+            )
+            saveCurrentUser(freshUser)
+        }
+        prefs.edit()
+            .remove(KEY_STAKES)
+            .remove(KEY_PEER_STAKES)
+            .remove(KEY_SOCIAL_FEED)
+            .apply()
     }
 
     // --- My Stakes ---
@@ -131,7 +172,6 @@ class AppPreferences(context: Context) {
     fun addSocialFeedItem(item: SocialFeedItem) {
         val feed = getSocialFeed()
         feed.add(0, item)
-        // Keep latest 50 items
         if (feed.size > 50) {
             feed.subList(50, feed.size).clear()
         }
@@ -161,7 +201,6 @@ class AppPreferences(context: Context) {
         current.add(friend)
         saveFriends(current)
 
-        // Add to user friend list
         val user = getCurrentUser()
         if (user != null && !user.friendsList.contains(friend.id)) {
             user.friendsList.add(friend.id)

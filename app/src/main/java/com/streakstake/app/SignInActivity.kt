@@ -8,13 +8,14 @@ import androidx.appcompat.app.AppCompatActivity
 import com.streakstake.app.data.AppPreferences
 import com.streakstake.app.databinding.ActivitySignInBinding
 import com.streakstake.app.models.User
+import java.util.Random
 import java.util.UUID
 
 class SignInActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivitySignInBinding
     private lateinit var prefs: AppPreferences
-    private var isSignUpMode: Boolean = false
+    private var isCustomExpanded = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,66 +34,59 @@ class SignInActivity : AppCompatActivity() {
     }
 
     private fun setupListeners() {
-        binding.tvToggleMode.setOnClickListener {
-            isSignUpMode = !isSignUpMode
-            updateUiMode()
+        // One-tap direct Google Sign-In: Zero questions, no email prompt, no personal name
+        binding.btnGoogleFast.setOnClickListener {
+            handleFastGoogleAuth()
         }
 
-        binding.btnSubmit.setOnClickListener {
-            handleEmailAuth()
+        binding.tvToggleCustomAuth.setOnClickListener {
+            isCustomExpanded = !isCustomExpanded
+            binding.layoutCustomAuth.visibility = if (isCustomExpanded) View.VISIBLE else View.GONE
+            binding.tvToggleCustomAuth.text = if (isCustomExpanded) "Hide custom credentials ▴" else "Or sign in with custom credentials ▾"
         }
 
-        binding.btnGoogle.setOnClickListener {
-            handleGoogleAuth()
-        }
-    }
-
-    private fun updateUiMode() {
-        if (isSignUpMode) {
-            binding.tvFormTitle.text = "Create Account"
-            binding.etName.visibility = View.VISIBLE
-            binding.btnSubmit.text = "Create Account & Claim 500 XP"
-            binding.tvToggleMode.text = "Already have an account? Sign In"
-        } else {
-            binding.tvFormTitle.text = "Sign In"
-            binding.etName.visibility = View.GONE
-            binding.btnSubmit.text = "Sign In"
-            binding.tvToggleMode.text = "New challenger? Create Account"
+        binding.btnCustomSubmit.setOnClickListener {
+            handleCustomAuth()
         }
     }
 
-    private fun handleEmailAuth() {
-        val email = binding.etEmail.text.toString().trim()
-        val password = binding.etPassword.text.toString().trim()
+    private fun handleFastGoogleAuth() {
+        val randomNum = Random().nextInt(900) + 100
+        val anonymousName = "Challenger #$randomNum"
+        val anonymousHandle = "@challenger_$randomNum"
 
-        if (email.isEmpty()) {
-            binding.etEmail.error = "Please enter your email"
-            return
-        }
+        val user = User(
+            id = "g_user_" + UUID.randomUUID().toString().take(8),
+            name = anonymousName,
+            email = "challenger$randomNum@streakstake.app",
+            username = anonymousHandle,
+            totalXp = 500,
+            currentStreak = 0,
+            bestStreak = 0,
+            challengesCompleted = 0,
+            challengesFailed = 0
+        )
 
-        if (password.length < 4) {
-            binding.etPassword.error = "Password must be at least 4 characters"
-            return
-        }
+        prefs.saveCurrentUser(user)
+        Toast.makeText(this, "Welcome $anonymousHandle! 500 XP granted.", Toast.LENGTH_SHORT).show()
+        navigateToMain()
+    }
 
-        val name = if (isSignUpMode) {
-            val enteredName = binding.etName.text.toString().trim()
-            if (enteredName.isEmpty()) {
-                binding.etName.error = "Please enter your name"
-                return
-            }
-            enteredName
-        } else {
-            email.substringBefore("@").replaceFirstChar { it.uppercase() }
-        }
+    private fun handleCustomAuth() {
+        val nameInput = binding.etCustomName.text.toString().trim()
+        val emailInput = binding.etCustomEmail.text.toString().trim()
+        val passwordInput = binding.etCustomPassword.text.toString().trim()
 
-        val username = "@" + name.lowercase().replace(" ", "_")
+        val randomNum = Random().nextInt(900) + 100
+        val name = if (nameInput.isNotEmpty()) nameInput else "Challenger #$randomNum"
+        val handle = "@" + name.lowercase().replace(" ", "_").take(15)
+        val email = if (emailInput.isNotEmpty()) emailInput else "challenger$randomNum@streakstake.app"
 
         val user = User(
             id = "user_" + UUID.randomUUID().toString().take(8),
             name = name,
             email = email,
-            username = username,
+            username = handle,
             totalXp = 500,
             currentStreak = 0,
             bestStreak = 0,
@@ -101,26 +95,7 @@ class SignInActivity : AppCompatActivity() {
         )
 
         prefs.saveCurrentUser(user)
-        Toast.makeText(this, "Welcome, $name! 500 XP starter grant added.", Toast.LENGTH_SHORT).show()
-        navigateToMain()
-    }
-
-    private fun handleGoogleAuth() {
-        // Authenticate with Google
-        val user = User(
-            id = "g_user_" + UUID.randomUUID().toString().take(8),
-            name = "Challenger",
-            email = "challenger@gmail.com",
-            username = "@challenger",
-            totalXp = 500,
-            currentStreak = 0,
-            bestStreak = 0,
-            challengesCompleted = 0,
-            challengesFailed = 0
-        )
-
-        prefs.saveCurrentUser(user)
-        Toast.makeText(this, "Signed in with Google! 500 XP granted.", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "Account created: $handle! 500 XP granted.", Toast.LENGTH_SHORT).show()
         navigateToMain()
     }
 

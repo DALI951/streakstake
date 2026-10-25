@@ -11,154 +11,171 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:orientation="vertical"
-        android:padding="24dp">
+        android:padding="28dp">
 
         <!-- App Icon -->
         <ImageView
             android:id="@+id/ivLogo"
-            android:layout_width="88dp"
-            android:layout_height="88dp"
+            android:layout_width="96dp"
+            android:layout_height="96dp"
             android:contentDescription="@string/app_name"
             android:src="@mipmap/ic_launcher" />
 
-        <!-- App Title in Pure Two-Color Accent -->
+        <!-- Title & Slogan -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:fontFamily="sans-serif-black"
-            android:letterSpacing="0.08"
+            android:letterSpacing="0.06"
             android:text="STREAKSTAKE"
             android:textColor="@color/brand_orange"
-            android:textSize="26sp" />
+            android:textSize="28sp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="Proof or Burn Accountability"
+            android:letterSpacing="0.04"
+            android:text="STAKE XP. WALK. PROOF OR BURN."
             android:textColor="@color/text_gray"
-            android:textSize="13sp" />
+            android:textSize="12sp"
+            android:textStyle="bold" />
 
-        <!-- Sign In Card -->
+        <!-- Starter Grant Badge -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/bg_input_field"
+            android:paddingHorizontal="14dp"
+            android:paddingVertical="6dp"
+            android:text="⚡ 500 XP Welcome Balance Included"
+            android:textColor="@color/brand_orange"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <!-- Main Instant Google Sign-In Card -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
+            android:layout_marginTop="28dp"
             android:background="@drawable/bg_card_dark"
             android:orientation="vertical"
-            android:padding="24dp">
-
-            <TextView
-                android:id="@+id/tvFormTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="sans-serif-medium"
-                android:text="Sign In"
-                android:textColor="@color/text_white"
-                android:textSize="18sp" />
+            android:padding="22dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:text="+500 XP Welcome Bonus upon registration"
-                android:textColor="@color/brand_orange"
-                android:textSize="11sp" />
-
-            <!-- Name Input (For Sign Up) -->
-            <EditText
-                android:id="@+id/etName"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:layout_marginTop="20dp"
-                android:background="@drawable/bg_input_field"
-                android:hint="Your Name / Gamer Tag"
-                android:inputType="textPersonName"
-                android:paddingHorizontal="16dp"
+                android:fontFamily="sans-serif-bold"
+                android:text="Instant One-Tap Access"
                 android:textColor="@color/text_white"
-                android:textColorHint="@color/text_muted"
-                android:textSize="14sp"
-                android:visibility="gone" />
+                android:textSize="16sp" />
 
-            <!-- Email Input -->
-            <EditText
-                android:id="@+id/etEmail"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:layout_marginTop="12dp"
-                android:background="@drawable/bg_input_field"
-                android:hint="Email Address"
-                android:inputType="textEmailAddress"
-                android:paddingHorizontal="16dp"
-                android:textColor="@color/text_white"
-                android:textColorHint="@color/text_muted"
-                android:textSize="14sp" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="No forms, no personal info required. Instant challenger access."
+                android:textColor="@color/text_gray"
+                android:textSize="12sp" />
 
-            <!-- Password Input -->
-            <EditText
-                android:id="@+id/etPassword"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:layout_marginTop="12dp"
-                android:background="@drawable/bg_input_field"
-                android:hint="Password"
-                android:inputType="textPassword"
-                android:paddingHorizontal="16dp"
-                android:textColor="@color/text_white"
-                android:textColorHint="@color/text_muted"
-                android:textSize="14sp" />
-
-            <!-- Submit Button -->
+            <!-- Prominent Google One-Tap Sign In Button -->
             <Button
-                android:id="@+id/btnSubmit"
+                android:id="@+id/btnGoogleFast"
                 android:layout_width="match_parent"
                 android:layout_height="52dp"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="18dp"
                 android:background="@drawable/btn_orange_rounded"
                 android:fontFamily="sans-serif-black"
-                android:text="Sign In"
+                android:letterSpacing="0.02"
+                android:text="CONTINUE WITH GOOGLE"
                 android:textAllCaps="false"
-                android:textColor="@color/text_white"
-                android:textSize="15sp"
+                android:textColor="@color/bg_black"
+                android:textSize="14sp"
                 app:backgroundTint="@null" />
 
-            <!-- Quick Google Connect Button -->
-            <Button
-                android:id="@+id/btnGoogle"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:layout_marginTop="12dp"
-                android:background="@drawable/bg_input_field"
-                android:fontFamily="sans-serif-medium"
-                android:text="Continue with Google"
-                android:textAllCaps="false"
-                android:textColor="@color/text_white"
-                android:textSize="13sp"
-                app:backgroundTint="@null" />
-
-            <!-- Toggle Mode Link -->
+            <!-- Discreet Custom Login Toggle -->
             <TextView
-                android:id="@+id/tvToggleMode"
+                android:id="@+id/tvToggleCustomAuth"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginTop="16dp"
-                android:padding="8dp"
-                android:text="New challenger? Create Account"
-                android:textColor="@color/brand_orange"
-                android:textSize="13sp" />
+                android:padding="6dp"
+                android:text="Or sign in with custom credentials ▾"
+                android:textColor="@color/text_gray"
+                android:textSize="12sp" />
+
+            <!-- Collapsible Custom Email Form -->
+            <LinearLayout
+                android:id="@+id/layoutCustomAuth"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <EditText
+                    android:id="@+id/etCustomName"
+                    android:layout_width="match_parent"
+                    android:layout_height="46dp"
+                    android:background="@drawable/bg_input_field"
+                    android:hint="Gamer Tag / Username"
+                    android:paddingHorizontal="14dp"
+                    android:textColor="@color/text_white"
+                    android:textColorHint="@color/text_gray"
+                    android:textSize="13sp" />
+
+                <EditText
+                    android:id="@+id/etCustomEmail"
+                    android:layout_width="match_parent"
+                    android:layout_height="46dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/bg_input_field"
+                    android:hint="Email (Optional)"
+                    android:inputType="textEmailAddress"
+                    android:paddingHorizontal="14dp"
+                    android:textColor="@color/text_white"
+                    android:textColorHint="@color/text_gray"
+                    android:textSize="13sp" />
+
+                <EditText
+                    android:id="@+id/etCustomPassword"
+                    android:layout_width="match_parent"
+                    android:layout_height="46dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/bg_input_field"
+                    android:hint="Password"
+                    android:inputType="textPassword"
+                    android:paddingHorizontal="14dp"
+                    android:textColor="@color/text_white"
+                    android:textColorHint="@color/text_gray"
+                    android:textSize="13sp" />
+
+                <Button
+                    android:id="@+id/btnCustomSubmit"
+                    android:layout_width="match_parent"
+                    android:layout_height="46dp"
+                    android:layout_marginTop="12dp"
+                    android:background="@drawable/bg_input_field"
+                    android:fontFamily="sans-serif-bold"
+                    android:text="Sign In with Custom Account"
+                    android:textAllCaps="false"
+                    android:textColor="@color/brand_orange"
+                    android:textSize="13sp"
+                    app:backgroundTint="@null" />
+            </LinearLayout>
 
         </LinearLayout>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="Native Android • Minimalist Architecture"
-            android:textColor="@color/text_muted"
+            android:layout_marginTop="28dp"
+            android:text="Pure Native Android • Sensor &amp; Peer Verified"
+            android:textColor="@color/text_gray"
             android:textSize="11sp" />
 
     </LinearLayout>
-
 </ScrollView>

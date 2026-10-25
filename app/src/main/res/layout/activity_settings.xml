@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_black"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <!-- Top Header with Back Button -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnBackSettings"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/bg_input_field"
+                android:text="←"
+                android:textColor="@color/text_white"
+                android:textSize="18sp"
+                app:backgroundTint="@null" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
+                android:layout_weight="1"
+                android:fontFamily="sans-serif-black"
+                android:letterSpacing="0.04"
+                android:text="SETTINGS &amp; CONFIG"
+                android:textColor="@color/brand_orange"
+                android:textSize="18sp" />
+        </LinearLayout>
+
+        <!-- SECTION 1: ACCOUNT CONFIGURATION -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:fontFamily="sans-serif-black"
+            android:text="ACCOUNT CONFIGURATION"
+            android:textColor="@color/brand_orange"
+            android:textSize="12sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_card_dark"
+            android:orientation="vertical"
+            android:padding="18dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Display Name"
+                android:textColor="@color/text_gray"
+                android:textSize="11sp" />
+
+            <EditText
+                android:id="@+id/etSettingsName"
+                android:layout_width="match_parent"
+                android:layout_height="46dp"
+                android:layout_marginTop="4dp"
+                android:background="@drawable/bg_input_field"
+                android:hint="Challenger Name"
+                android:paddingHorizontal="14dp"
+                android:textColor="@color/text_white"
+                android:textColorHint="@color/text_gray"
+                android:textSize="13sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="Username Handle"
+                android:textColor="@color/text_gray"
+                android:textSize="11sp" />
+
+            <EditText
+                android:id="@+id/etSettingsHandle"
+                android:layout_width="match_parent"
+                android:layout_height="46dp"
+                android:layout_marginTop="4dp"
+                android:background="@drawable/bg_input_field"
+                android:hint="@username"
+                android:paddingHorizontal="14dp"
+                android:textColor="@color/text_white"
+                android:textColorHint="@color/text_gray"
+                android:textSize="13sp" />
+
+            <Button
+                android:id="@+id/btnSaveAccount"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/btn_orange_rounded"
+                android:fontFamily="sans-serif-bold"
+                android:text="Save Account Changes"
+                android:textAllCaps="false"
+                android:textColor="@color/bg_black"
+                android:textSize="13sp"
+                app:backgroundTint="@null" />
+        </LinearLayout>
+
+        <!-- SECTION 2: GITHUB IN-APP UPDATES -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:fontFamily="sans-serif-black"
+            android:text="GITHUB IN-APP UPDATER"
+            android:textColor="@color/brand_orange"
+            android:textSize="12sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_card_dark"
+            android:orientation="vertical"
+            android:padding="18dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tvSettingsVersion"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:fontFamily="sans-serif-bold"
+                    android:text="Installed Version: v2.2.0"
+                    android:textColor="@color/text_white"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/tvUpdateStatusBadge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_input_field"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="3dp"
+                    android:text="UP TO DATE"
+                    android:textColor="@color/brand_orange"
+                    android:textSize="10sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:lineSpacingExtra="2dp"
+                android:text="StreakStake compiles directly via GitHub Actions. Tapping below checks for the latest APK release and installs it."
+                android:textColor="@color/text_gray"
+                android:textSize="12sp" />
+
+            <Button
+                android:id="@+id/btnCheckUpdatesSettings"
+                android:layout_width="match_parent"
+                android:layout_height="46dp"
+                android:layout_marginTop="14dp"
+                android:background="@drawable/btn_orange_rounded"
+                android:fontFamily="sans-serif-black"
+                android:text="⚡ CHECK FOR UPDATES NOW"
+                android:textAllCaps="false"
+                android:textColor="@color/bg_black"
+                android:textSize="13sp"
+                app:backgroundTint="@null" />
+
+            <Button
+                android:id="@+id/btnOpenGitHub"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginTop="8dp"
+                android:background="@android:color/transparent"
+                android:text="Open GitHub Repository ↗"
+                android:textAllCaps="false"
+                android:textColor="@color/text_gray"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <!-- SECTION 3: SENSORS & HARDWARE DETECTION -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:fontFamily="sans-serif-black"
+            android:text="TRACKING &amp; SENSORS"
+            android:textColor="@color/brand_orange"
+            android:textSize="12sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_card_dark"
+            android:orientation="vertical"
+            android:padding="18dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="GPS Distance Tracking"
+                    android:textColor="@color/text_white"
+                    android:textSize="13sp" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/switchGps"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    app:thumbTint="@color/brand_orange"
+                    app:trackTint="@color/border_dark" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Haptic Vibration Feedback"
+                    android:textColor="@color/text_white"
+                    android:textSize="13sp" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/switchHaptic"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    app:thumbTint="@color/brand_orange"
+                    app:trackTint="@color/border_dark" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="Hardware Step Sensor + Accelerometer peak filter active."
+                android:textColor="@color/text_gray"
+                android:textSize="11sp" />
+        </LinearLayout>
+
+        <!-- SECTION 4: DATA RESET & LOGOUT -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:fontFamily="sans-serif-black"
+            android:text="DATA &amp; SESSION"
+            android:textColor="@color/brand_orange"
+            android:textSize="12sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="32dp"
+            android:background="@drawable/bg_card_dark"
+            android:orientation="vertical"
+            android:padding="18dp">
+
+            <Button
+                android:id="@+id/btnResetData"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:background="@drawable/bg_input_field"
+                android:fontFamily="sans-serif-medium"
+                android:text="Reset Stakes &amp; Restore 500 XP"
+                android:textAllCaps="false"
+                android:textColor="@color/text_white"
+                android:textSize="12sp"
+                app:backgroundTint="@null" />
+
+            <Button
+                android:id="@+id/btnSignOutSettings"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/bg_input_field"
+                android:fontFamily="sans-serif-bold"
+                android:text="Sign Out"
+                android:textAllCaps="false"
+                android:textColor="@color/brand_orange"
+                android:textSize="12sp"
+                app:backgroundTint="@null" />
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

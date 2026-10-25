@@ -12,20 +12,16 @@ import androidx.core.content.ContextCompat
 import com.streakstake.app.data.AppPreferences
 import com.streakstake.app.databinding.ActivityMainBinding
 import com.streakstake.app.models.Friend
-import com.streakstake.app.models.GitHubAsset
-import com.streakstake.app.models.GitHubRelease
 import com.streakstake.app.models.SocialFeedItem
 import com.streakstake.app.models.Stake
 import com.streakstake.app.models.StakeStatus
 import com.streakstake.app.models.User
-import com.streakstake.app.updater.GitHubUpdateManager
 import java.util.UUID
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var prefs: AppPreferences
-    private lateinit var updateManager: GitHubUpdateManager
     private var currentUser: User? = null
 
     private var selectedMeters = 500
@@ -35,7 +31,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         prefs = AppPreferences(this)
-        updateManager = GitHubUpdateManager(this)
 
         currentUser = prefs.getCurrentUser()
         if (currentUser == null) {
@@ -46,11 +41,11 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setupHeader()
         setupTabs()
         setupDistanceSelector()
         setupStakeSelector()
         setupActions()
-        setupGitHubUpdater()
     }
 
     override fun onResume() {
@@ -64,40 +59,19 @@ class MainActivity : AppCompatActivity() {
         renderCurrentTab()
     }
 
+    private fun setupHeader() {
+        binding.btnSettings.setOnClickListener {
+            val intent = Intent(this, SettingsActivity::class.java)
+            startActivity(intent)
+        }
+    }
+
     private fun updateUserHeader() {
         currentUser?.let { user ->
             binding.tvUserName.text = user.name
             binding.tvUserHandle.text = if (user.username.isNotEmpty()) user.username else "@" + user.name.lowercase().replace(" ", "_")
             binding.tvXpBalance.text = "${user.totalXp} XP"
             binding.tvStreakCount.text = "${user.currentStreak} Days"
-        }
-    }
-
-    private fun setupGitHubUpdater() {
-        // Check for updates automatically in background (silent mode)
-        updateManager.checkForUpdates(silent = true, object : GitHubUpdateManager.UpdateCheckCallback {
-            override fun onUpdateAvailable(release: GitHubRelease, apkAsset: GitHubAsset) {
-                binding.btnCheckUpdate.text = "⚡ UPDATE (${release.tag_name})"
-                binding.btnCheckUpdate.setTextColor(ContextCompat.getColor(this@MainActivity, R.color.brand_orange))
-            }
-            override fun onUpToDate() {}
-            override fun onError(message: String) {}
-        })
-
-        // Tap manual update button
-        binding.btnCheckUpdate.setOnClickListener {
-            Toast.makeText(this, "Checking GitHub for latest release...", Toast.LENGTH_SHORT).show()
-            updateManager.checkForUpdates(silent = false, object : GitHubUpdateManager.UpdateCheckCallback {
-                override fun onUpdateAvailable(release: GitHubRelease, apkAsset: GitHubAsset) {
-                    updateManager.showUpdateDialog(this@MainActivity, release, apkAsset)
-                }
-                override fun onUpToDate() {
-                    Toast.makeText(this@MainActivity, "StreakStake is up to date (${BuildConfig.VERSION_NAME})", Toast.LENGTH_SHORT).show()
-                }
-                override fun onError(message: String) {
-                    Toast.makeText(this@MainActivity, "Update check failed: $message", Toast.LENGTH_SHORT).show()
-                }
-            })
         }
     }
 
@@ -196,11 +170,6 @@ class MainActivity : AppCompatActivity() {
             handleCreateAndStartWalk()
         }
 
-        binding.btnSignOut.setOnClickListener {
-            prefs.saveCurrentUser(null)
-            navigateToSignIn()
-        }
-
         binding.btnAddFriend.setOnClickListener {
             val query = binding.etAddFriend.text.toString().trim()
             if (query.isEmpty()) {
@@ -290,7 +259,7 @@ class MainActivity : AppCompatActivity() {
                 if (stake.isPending) {
                     tvCategory.text = "PENDING VERIFICATION"
                     tvCategory.setTextColor(ContextCompat.getColor(this, R.color.brand_orange))
-                    tvDesc.text = "Proof submitted (${stake.currentMeters}m). Waiting for peer approval."
+                    tvDesc.text = "Proof submitted (${stake.currentMeters}m). Waiting for peer review."
                     btnAction.text = "In Escrow"
                     btnAction.isEnabled = false
                 } else if (stake.isCompleted) {
@@ -399,7 +368,6 @@ class MainActivity : AppCompatActivity() {
         prefs.updateStake(stake)
         prefs.removePeerPendingStake(stake.id)
 
-        // Award reward to user if it was own or peer
         val bonus = (stake.stakeXp * 0.5).toInt()
         val totalReward = stake.stakeXp + bonus
 
@@ -505,7 +473,6 @@ class MainActivity : AppCompatActivity() {
         binding.layoutLeaderboardContainer.removeAllViews()
         val user = currentUser ?: return
 
-        // Build list with current user + friends
         val list = mutableListOf<Friend>()
         list.add(
             Friend(
@@ -517,7 +484,6 @@ class MainActivity : AppCompatActivity() {
             )
         )
         list.addAll(prefs.getFriends())
-        // Sort by XP descending, then streak descending
         list.sortWith(compareByDescending<Friend> { it.totalXp }.thenByDescending { it.streak })
 
         val inflater = LayoutInflater.from(this)

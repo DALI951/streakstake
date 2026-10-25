@@ -128,6 +128,7 @@ class WalkTrackerActivity : AppCompatActivity(), SensorEventListener, LocationLi
     }
 
     private fun startGpsTracking() {
+        if (!prefs.isGpsEnabled()) return
         try {
             locationManager = getSystemService(Context.LOCATION_SERVICE) as? LocationManager
             locationManager?.let { lm ->
@@ -363,6 +364,7 @@ class WalkTrackerActivity : AppCompatActivity(), SensorEventListener, LocationLi
     }
 
     private fun vibrate(ms: Long) {
+        if (!prefs.isHapticEnabled()) return
         val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
         vibrator?.let {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

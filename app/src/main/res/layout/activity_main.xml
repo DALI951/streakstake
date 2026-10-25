@@ -6,14 +6,14 @@
     android:background="@color/bg_black"
     android:orientation="vertical">
 
-    <!-- Top App Header -->
+    <!-- Top Sleek Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/surface_dark"
         android:orientation="vertical"
         android:paddingHorizontal="20dp"
-        android:paddingTop="16dp"
+        android:paddingTop="18dp"
         android:paddingBottom="16dp">
 
         <LinearLayout
@@ -22,9 +22,19 @@
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
+            <!-- Avatar Flame Icon -->
+            <TextView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/bg_input_field"
+                android:gravity="center"
+                android:text="🔥"
+                android:textSize="18sp" />
+
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
                 android:layout_weight="1"
                 android:orientation="vertical">
 
@@ -42,41 +52,27 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@challenger"
-                    android:textColor="@color/text_gray"
-                    android:textSize="12sp" />
+                    android:textColor="@color/brand_orange"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
             </LinearLayout>
 
-            <!-- GitHub In-App Update Button -->
+            <!-- Dedicated Settings Button -->
             <Button
-                android:id="@+id/btnCheckUpdate"
-                android:layout_width="wrap_content"
-                android:layout_height="34dp"
-                android:layout_marginEnd="8dp"
+                android:id="@+id/btnSettings"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:background="@drawable/bg_card_dark"
-                android:paddingHorizontal="10dp"
-                android:text="⚡ UPDATE"
-                android:textColor="@color/brand_orange"
-                android:textSize="11sp"
-                android:textStyle="bold"
-                app:backgroundTint="@null" />
-
-            <!-- Sign Out Button -->
-            <Button
-                android:id="@+id/btnSignOut"
-                android:layout_width="34dp"
-                android:layout_height="34dp"
-                android:background="@drawable/bg_card_dark"
-                android:text="⏻"
-                android:textColor="@color/text_gray"
-                android:textSize="13sp"
+                android:text="⚙️"
+                android:textSize="16sp"
                 app:backgroundTint="@null" />
         </LinearLayout>
 
-        <!-- Stats Bar: XP Balance & Current Streak -->
+        <!-- Stats Bar: Available XP & Current Streak -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="14dp"
             android:baselineAligned="false"
             android:orientation="horizontal">
 
@@ -92,6 +88,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:letterSpacing="0.04"
                     android:text="AVAILABLE XP"
                     android:textColor="@color/text_gray"
                     android:textSize="10sp"
@@ -105,7 +102,7 @@
                     android:fontFamily="sans-serif-black"
                     android:text="500 XP"
                     android:textColor="@color/brand_orange"
-                    android:textSize="20sp" />
+                    android:textSize="22sp" />
             </LinearLayout>
 
             <LinearLayout
@@ -120,6 +117,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:letterSpacing="0.04"
                     android:text="CURRENT STREAK"
                     android:textColor="@color/text_gray"
                     android:textSize="10sp"
@@ -133,7 +131,7 @@
                     android:fontFamily="sans-serif-black"
                     android:text="0 Days"
                     android:textColor="@color/text_white"
-                    android:textSize="20sp" />
+                    android:textSize="22sp" />
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
@@ -164,14 +162,14 @@
                     android:layout_height="wrap_content"
                     android:background="@drawable/bg_card_dark"
                     android:orientation="vertical"
-                    android:padding="18dp">
+                    android:padding="20dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:fontFamily="sans-serif-black"
-                        android:text="WALK DISTANCE TARGET"
-                        android:textColor="@color/text_white"
+                        android:text="SET WALK DISTANCE TARGET"
+                        android:textColor="@color/brand_orange"
                         android:textSize="12sp" />
 
                     <!-- Distance Selector Buttons -->
@@ -184,39 +182,39 @@
                         <Button
                             android:id="@+id/btnDist250"
                             android:layout_width="0dp"
-                            android:layout_height="42dp"
+                            android:layout_height="44dp"
                             android:layout_marginEnd="4dp"
                             android:layout_weight="1"
                             android:background="@drawable/bg_input_field"
                             android:text="250m"
                             android:textColor="@color/text_white"
-                            android:textSize="12sp"
+                            android:textSize="13sp"
                             android:textStyle="bold"
                             app:backgroundTint="@null" />
 
                         <Button
                             android:id="@+id/btnDist500"
                             android:layout_width="0dp"
-                            android:layout_height="42dp"
+                            android:layout_height="44dp"
                             android:layout_marginHorizontal="4dp"
                             android:layout_weight="1"
                             android:background="@drawable/btn_orange_rounded"
                             android:text="500m"
                             android:textColor="@color/bg_black"
-                            android:textSize="12sp"
+                            android:textSize="13sp"
                             android:textStyle="bold"
                             app:backgroundTint="@null" />
 
                         <Button
                             android:id="@+id/btnDist1000"
                             android:layout_width="0dp"
-                            android:layout_height="42dp"
+                            android:layout_height="44dp"
                             android:layout_marginStart="4dp"
                             android:layout_weight="1"
                             android:background="@drawable/bg_input_field"
                             android:text="1,000m"
                             android:textColor="@color/text_white"
-                            android:textSize="12sp"
+                            android:textSize="13sp"
                             android:textStyle="bold"
                             app:backgroundTint="@null" />
                     </LinearLayout>
@@ -224,10 +222,10 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
+                        android:layout_marginTop="18dp"
                         android:fontFamily="sans-serif-black"
                         android:text="LOCK YOUR XP STAKE"
-                        android:textColor="@color/text_white"
+                        android:textColor="@color/brand_orange"
                         android:textSize="12sp" />
 
                     <!-- Stake Selector Buttons -->
@@ -240,39 +238,39 @@
                         <Button
                             android:id="@+id/btnStake50"
                             android:layout_width="0dp"
-                            android:layout_height="42dp"
+                            android:layout_height="44dp"
                             android:layout_marginEnd="4dp"
                             android:layout_weight="1"
                             android:background="@drawable/bg_input_field"
                             android:text="50 XP"
                             android:textColor="@color/text_white"
-                            android:textSize="12sp"
+                            android:textSize="13sp"
                             android:textStyle="bold"
                             app:backgroundTint="@null" />
 
                         <Button
                             android:id="@+id/btnStake100"
                             android:layout_width="0dp"
-                            android:layout_height="42dp"
+                            android:layout_height="44dp"
                             android:layout_marginHorizontal="4dp"
                             android:layout_weight="1"
                             android:background="@drawable/btn_orange_rounded"
                             android:text="100 XP"
                             android:textColor="@color/bg_black"
-                            android:textSize="12sp"
+                            android:textSize="13sp"
                             android:textStyle="bold"
                             app:backgroundTint="@null" />
 
                         <Button
                             android:id="@+id/btnStake200"
                             android:layout_width="0dp"
-                            android:layout_height="42dp"
+                            android:layout_height="44dp"
                             android:layout_marginStart="4dp"
                             android:layout_weight="1"
                             android:background="@drawable/bg_input_field"
                             android:text="200 XP"
                             android:textColor="@color/text_white"
-                            android:textSize="12sp"
+                            android:textSize="13sp"
                             android:textStyle="bold"
                             app:backgroundTint="@null" />
                     </LinearLayout>
@@ -281,11 +279,12 @@
                     <Button
                         android:id="@+id/btnStartWalk"
                         android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:layout_marginTop="18dp"
+                        android:layout_height="52dp"
+                        android:layout_marginTop="20dp"
                         android:background="@drawable/btn_orange_rounded"
                         android:fontFamily="sans-serif-black"
-                        android:text="STAKE &amp; START WALKING"
+                        android:letterSpacing="0.02"
+                        android:text="LOCK STAKE &amp; START WALKING"
                         android:textAllCaps="false"
                         android:textColor="@color/bg_black"
                         android:textSize="14sp"
@@ -296,9 +295,9 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="24dp"
+                    android:layout_marginTop="26dp"
                     android:fontFamily="sans-serif-black"
-                    android:text="MY STAKES"
+                    android:text="ACTIVE &amp; PENDING STAKES"
                     android:textColor="@color/brand_orange"
                     android:textSize="13sp" />
 
@@ -325,7 +324,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="Pick a distance above, stake XP, and walk!"
+                        android:text="Select a distance target above and lock your XP!"
                         android:textColor="@color/text_gray"
                         android:textSize="12sp" />
                 </LinearLayout>
@@ -559,7 +558,7 @@
     <!-- Bottom Navigation Bar (4 Sleek Tabs) -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="58dp"
         android:background="@color/surface_dark"
         android:orientation="horizontal">
 
@@ -572,12 +571,20 @@
             android:orientation="vertical">
 
             <TextView
+                android:id="@+id/tabStakesIcon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="⚡"
+                android:textSize="14sp" />
+
+            <TextView
                 android:id="@+id/tabStakesText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
                 android:text="STAKES"
                 android:textColor="@color/brand_orange"
-                android:textSize="11sp"
+                android:textSize="10sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
@@ -590,12 +597,20 @@
             android:orientation="vertical">
 
             <TextView
+                android:id="@+id/tabVerifyIcon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="⚖️"
+                android:textSize="14sp" />
+
+            <TextView
                 android:id="@+id/tabVerifyText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
                 android:text="VERIFY"
                 android:textColor="@color/text_gray"
-                android:textSize="11sp"
+                android:textSize="10sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
@@ -608,12 +623,20 @@
             android:orientation="vertical">
 
             <TextView
+                android:id="@+id/tabFeedIcon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="💬"
+                android:textSize="14sp" />
+
+            <TextView
                 android:id="@+id/tabFeedText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
                 android:text="FEED"
                 android:textColor="@color/text_gray"
-                android:textSize="11sp"
+                android:textSize="10sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
@@ -626,12 +649,20 @@
             android:orientation="vertical">
 
             <TextView
+                android:id="@+id/tabLeaderboardIcon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🏆"
+                android:textSize="14sp" />
+
+            <TextView
                 android:id="@+id/tabLeaderboardText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
                 android:text="FRIENDS"
                 android:textColor="@color/text_gray"
-                android:textSize="11sp"
+                android:textSize="10sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
