@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
@@ -164,26 +165,44 @@ class GitHubUpdateManager(private val context: Context) {
             var output: FileOutputStream? = null
             var connection: HttpURLConnection? = null
             try {
-                val url = URL(downloadUrl)
-                connection = url.openConnection() as HttpURLConnection
-                connection.connectTimeout = 15000
-                connection.readTimeout = 15000
-                connection.instanceFollowRedirects = true
+                // Loop through redirects (e.g. GitHub release -> AWS/Azure CDN)
+                var currentUrl = downloadUrl
+                var redirectCount = 0
+                val maxRedirects = 5
 
-                // Follow redirects if any (GitHub releases redirect to S3/objects)
-                var redirectUrl = downloadUrl
-                var status = connection.responseCode
-                if (status == HttpURLConnection.HTTP_MOVED_TEMP || status == HttpURLConnection.HTTP_MOVED_PERM || status == 307 || status == 308) {
-                    redirectUrl = connection.getHeaderField("Location")
-                    connection = URL(redirectUrl).openConnection() as HttpURLConnection
+                while (redirectCount < maxRedirects) {
+                    val url = URL(currentUrl)
+                    connection = url.openConnection() as HttpURLConnection
+                    connection.connectTimeout = 20000
+                    connection.readTimeout = 20000
+                    connection.instanceFollowRedirects = false
+                    connection.setRequestProperty("User-Agent", "StreakStake-Android-App")
+                    connection.connect()
+
+                    val status = connection.responseCode
+                    if (status == HttpURLConnection.HTTP_MOVED_TEMP ||
+                        status == HttpURLConnection.HTTP_MOVED_PERM ||
+                        status == 307 || status == 308
+                    ) {
+                        val newLocation = connection.getHeaderField("Location")
+                        connection.disconnect()
+                        if (newLocation != null) {
+                            currentUrl = newLocation
+                            redirectCount++
+                            continue
+                        }
+                    }
+                    break
                 }
 
-                connection.connect()
+                if (connection == null || connection.responseCode !in 200..299) {
+                    throw IllegalStateException("Failed to download APK: HTTP ${connection?.responseCode}")
+                }
 
                 val fileLength = connection.contentLength
-                val downloadsDir = activity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
-                    ?: activity.filesDir
-                val apkFile = File(downloadsDir, "StreakStake-latest.apk")
+                val apkDir = File(activity.cacheDir, "updates")
+                if (!apkDir.exists()) apkDir.mkdirs()
+                val apkFile = File(apkDir, "StreakStake-update.apk")
 
                 if (apkFile.exists()) {
                     apkFile.delete()
@@ -192,19 +211,34 @@ class GitHubUpdateManager(private val context: Context) {
                 input = connection.inputStream
                 output = FileOutputStream(apkFile)
 
-                val data = ByteArray(4096)
+                val data = ByteArray(8192)
                 var total: Long = 0
                 var count: Int
                 while (input.read(data).also { count = it } != -1) {
                     total += count
                     if (fileLength > 0) {
-                        val progress = ((total * 100) / fileLength).toInt()
+                        val progress = ((total * 100) / fileLength).toInt().coerceIn(0, 99)
                         onProgress(progress)
                     }
                     output.write(data, 0, count)
                 }
 
                 output.flush()
+                output.close()
+                output = null
+
+                if (!apkFile.exists() || apkFile.length() == 0L) {
+                    throw IllegalStateException("Downloaded APK file is empty.")
+                }
+
+                // Verify file integrity with Android PackageManager
+                val pkgInfo = activity.packageManager.getPackageArchiveInfo(apkFile.absolutePath, 0)
+                if (pkgInfo == null) {
+                    apkFile.delete()
+                    throw IllegalStateException("Downloaded file is not a valid Android APK or was truncated.")
+                }
+
+                apkFile.setReadable(true, false)
                 onProgress(100)
 
                 mainHandler.post {
@@ -237,7 +271,7 @@ class GitHubUpdateManager(private val context: Context) {
                     data = Uri.parse("package:${activity.packageName}")
                 }
                 activity.startActivity(intent)
-                Toast.makeText(activity, "Please allow StreakStake to install updates, then retry.", Toast.LENGTH_LONG).show()
+                Toast.makeText(activity, "Please allow 'Install unknown apps' for StreakStake, then tap Update again.", Toast.LENGTH_LONG).show()
                 return
             }
         }
@@ -251,7 +285,14 @@ class GitHubUpdateManager(private val context: Context) {
 
             val intent = Intent(Intent.ACTION_VIEW).apply {
                 setDataAndType(apkUri, "application/vnd.android.package-archive")
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            }
+
+            val resList = activity.packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY)
+            for (res in resList) {
+                activity.grantUriPermission(res.activityInfo.packageName, apkUri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
 
             activity.startActivity(intent)

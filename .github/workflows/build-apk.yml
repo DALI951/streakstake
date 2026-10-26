@@ -29,12 +29,12 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build Native Android APK
-        run: ./gradlew assembleDebug --no-daemon --stacktrace
+        run: ./gradlew assembleRelease --no-daemon --stacktrace
 
       - name: Prepare APK binary for release
         run: |
           mkdir -p release-artifacts
-          cp app/build/outputs/apk/debug/app-debug.apk release-artifacts/StreakStake.apk
+          cp app/build/outputs/apk/release/app-release.apk release-artifacts/StreakStake.apk
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
@@ -47,34 +47,35 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
         with:
-          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v2.5.0' }}
-          name: StreakStake Native Android Release ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v2.5.0' }}
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v2.5.1' }}
+          name: StreakStake Native Android Release ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v2.5.1' }}
           draft: false
           prerelease: false
           files: release-artifacts/StreakStake.apk
           body: |
-            ## StreakStake v2.5.0 - Custom Challenge Engine & Seamless 1-Tap Auth
+            ## StreakStake v2.5.1 - Permanent Signature & In-App Auto-Updater
 
             ### Direct Download
-            - **APK Binary:** [`StreakStake.apk`](https://github.com/DALI951/streakstake/releases/download/v2.5.0/StreakStake.apk)
+            - **APK Binary:** [`StreakStake.apk`](https://github.com/DALI951/streakstake/releases/download/v2.5.1/StreakStake.apk)
 
-            ### Highlights in v2.5.0:
+            ### Highlights in v2.5.1:
+            - **Permanent Cryptographic Signature Keystore:**
+              - Fixes "App not installed" error forever!
+              - App is now signed with a permanent, dedicated keystore across all builds.
+              - Enables flawless 1-tap in-app updates and future updates without signature conflict.
+            - **Rock-Solid In-App Updater:**
+              - Follows GitHub multi-hop CDN redirects securely.
+              - Pre-validates APK integrity with Android PackageManager before triggering install.
+              - Seamless FileProvider integration with universal cache storage.
             - **Seamless 1-Tap Google & Facebook Authentication (Zero Typing):**
-              - Never asks you to type your name or email.
-              - Uses native Android account selection and dedicated 1-tap OAuth bottom sheets with avatar and profile preview.
-              - Automatically derives your athlete name and `@tag`.
-              - Facebook login and linking in Settings now uses the exact same sleek 1-tap account selector screen as Google ("Continue as Dali").
-            - **Fully Customizable Challenge Generator:**
-              - Create ANY challenge you want: custom name (e.g. 100 Pushups, 50 Pull-ups, 5km Run, 150 Squats, Cold Plunge, Plank, etc.).
-              - Set ANY target number (reps, meters, minutes, steps) with custom units.
-              - Choose your XP stake (50, 100, 250, 500 XP) and lock it on the line.
-            - **Interactive Challenge Tracker with Rep Logger:**
-              - For rep-based challenges: clean numerical counter with `+1`, `+5`, `+10`, and `-1` logging buttons.
-              - For distance/walking challenges: native hardware step detector and GPS tracking.
-              - Real-time percentage progress bar and target completion rewards.
-            - **Friend Challenges & Accountability Countdown:**
-              - Bottom half of Home displays friend challenges with custom names, target counts, and **live countdown timers** ticking down each second.
-            - **Bespoke Vector UI:**
-              - Zero emojis, minimal Dark Cinema aesthetic (#0A0A0F / #12121A / #DC2626 crimson).
+              - Automatically retrieves your account without manual typing.
+              - Dedicated 1-tap OAuth bottom sheet for Facebook linking and login.
+            - **Fully Customizable Challenge Engine:**
+              - Create, name, and configure any challenge (Pushups, Pull-ups, Squats, Running, etc.) with custom targets, units, and XP stakes.
+              - Interactive rep logger with dynamic `+1`, `+5`, `+10`, `-1` buttons and native motion detection.
+            - **Live Friend Countdown Timers:**
+              - Real-time countdown timers ticking down on friend challenge cards.
+            - **Zero Emojis & Dark Cinema UI:**
+              - Clean aesthetic (#0A0A0F / #12121A / #DC2626 crimson).
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

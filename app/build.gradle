@@ -11,18 +11,31 @@ android {
         applicationId "com.streakstake.app"
         minSdk 24
         targetSdk 34
-        versionCode 7
-        versionName "2.5.0"
+        versionCode 8
+        versionName "2.5.1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        streakstake {
+            storeFile file("streakstake.keystore")
+            storePassword "streakstake"
+            keyAlias "streakstake"
+            keyPassword "streakstake"
+            v1SigningEnabled true
+            v2SigningEnabled true
+        }
+    }
+
     buildTypes {
         release {
+            signingConfig signingConfigs.streakstake
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
+            signingConfig signingConfigs.streakstake
             applicationIdSuffix ""
             debuggable true
         }
