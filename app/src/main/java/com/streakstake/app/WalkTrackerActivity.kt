@@ -48,6 +48,9 @@ class WalkTrackerActivity : AppCompatActivity(), SensorEventListener, LocationLi
     private var stepsCount = 0
     private var currentMeters = 0
     private var targetMeters = 500
+    private var targetCount = 100
+    private var currentCount = 0
+    private var unitStr = "REPS"
     private var lastMagnitude = 9.8
     private var lastStepTime = 0L
 
@@ -79,16 +82,58 @@ class WalkTrackerActivity : AppCompatActivity(), SensorEventListener, LocationLi
         val stakeId = intent.getStringExtra("STAKE_ID")
         stake = prefs.getStakes().find { it.id == stakeId }
 
-        targetMeters = stake?.targetMeters ?: intent.getIntExtra("TARGET_METERS", 500)
+        val title = stake?.title ?: intent.getStringExtra("TITLE") ?: "Challenge Tracker"
+        binding.tvTrackerTitle.text = title
+
+        targetCount = if ((stake?.targetValue ?: 0) > 0) stake!!.targetValue else intent.getIntExtra("TARGET_COUNT", 100)
+        currentCount = stake?.currentValue ?: 0
+        unitStr = stake?.unit?.uppercase() ?: "REPS"
         val stakeXp = stake?.stakeXp ?: intent.getIntExtra("STAKE_XP", 100)
 
         binding.tvStakeLockedPill.text = "$stakeXp XP Staked"
-        binding.tvMetersTarget.text = "/ $targetMeters METERS"
+        binding.tvMetersTarget.text = "/ $targetCount $unitStr"
+        binding.tvMetersCurrent.text = currentCount.toString()
 
+        val isDistanceMode = unitStr == "METERS" || unitStr == "M" || unitStr == "STEPS"
+        if (!isDistanceMode) {
+            binding.tvSensorStatus.text = "● Logging: $unitStr Counter"
+            binding.btnSimulateSteps.visibility = View.GONE
+        } else {
+            binding.tvSensorStatus.text = "● Native Step Detector & GPS Active"
+            binding.btnSimulateSteps.visibility = View.VISIBLE
+        }
+
+        updateProgressUI()
         initSensors()
         setupListeners()
 
         handler.post(timerRunnable)
+    }
+
+    private fun updateProgressUI() {
+        binding.tvMetersCurrent.text = currentCount.toString()
+        val progress = if (targetCount > 0) ((currentCount.toFloat() / targetCount.toFloat()) * 100).toInt().coerceIn(0, 100) else 0
+        binding.pbWalk.progress = progress
+
+        if (currentCount >= targetCount && !binding.btnCompleteWalk.isEnabled) {
+            binding.btnCompleteWalk.isEnabled = true
+            binding.btnCompleteWalk.text = "CLAIM REWARD ($currentCount $unitStr)"
+            vibrate(300)
+        } else if (currentCount < targetCount) {
+            binding.btnCompleteWalk.isEnabled = false
+            binding.btnCompleteWalk.text = "Complete & Claim XP ($currentCount/$targetCount)"
+        }
+    }
+
+    private fun addCount(amount: Int) {
+        currentCount = (currentCount + amount).coerceAtLeast(0)
+        stake?.let {
+            it.currentValue = currentCount
+            if (unitStr == "METERS") it.currentMeters = currentCount
+            prefs.updateStake(it)
+        }
+        vibrate(50)
+        updateProgressUI()
     }
 
     private fun initSensors() {
@@ -224,8 +269,14 @@ class WalkTrackerActivity : AppCompatActivity(), SensorEventListener, LocationLi
             finish()
         }
 
+        binding.btnAdd1.setOnClickListener { addCount(1) }
+        binding.btnAdd5.setOnClickListener { addCount(5) }
+        binding.btnAdd10.setOnClickListener { addCount(10) }
+        binding.btnSub1.setOnClickListener { addCount(-1) }
+
         binding.btnSimulateSteps.setOnClickListener {
             repeat(50) { onStepDetected() }
+            addCount(38)
             Toast.makeText(this, "+50 Steps Simulated (~38m)", Toast.LENGTH_SHORT).show()
         }
 
@@ -245,7 +296,7 @@ class WalkTrackerActivity : AppCompatActivity(), SensorEventListener, LocationLi
         val btnSubmitToPeers = dialogView.findViewById<Button>(R.id.btnSubmitToPeers)
         val btnClaimSolo = dialogView.findViewById<Button>(R.id.btnClaimSolo)
 
-        tvMetrics.text = "${currentMeters}m Walk Completed ($stepsCount Steps)"
+        tvMetrics.text = "${stake?.title ?: "Challenge"}: Completed $currentCount $unitStr"
 
         val dialog = AlertDialog.Builder(this)
             .setView(dialogView)

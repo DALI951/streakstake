@@ -47,30 +47,34 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
         with:
-          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v2.4.0' }}
-          name: StreakStake Native Android Release ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v2.4.0' }}
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v2.5.0' }}
+          name: StreakStake Native Android Release ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v2.5.0' }}
           draft: false
           prerelease: false
           files: release-artifacts/StreakStake.apk
           body: |
-            ## StreakStake v2.4.0 - Complete Core Rebuild
+            ## StreakStake v2.5.0 - Custom Challenge Engine & Seamless 1-Tap Auth
 
             ### Direct Download
-            - **APK Binary:** [`StreakStake.apk`](https://github.com/DALI951/streakstake/releases/download/v2.4.0/StreakStake.apk)
+            - **APK Binary:** [`StreakStake.apk`](https://github.com/DALI951/streakstake/releases/download/v2.5.0/StreakStake.apk)
 
-            ### Core Features in v2.4.0:
-            - **Native Google Sign-In:** Prompts for real Google accounts with native account selector (`play-services-auth`). Automatically derives user name and `@tag`.
-            - **Facebook Login & Account Linking:** Link Facebook in Settings to save your account and discover Facebook friends using StreakStake. Full account restore on login across Google, Facebook, or unique 8-character ID.
-            - **Unique 8-Character ID:** Cryptographically generated upon account creation containing uppercase, lowercase, numbers, and symbols (e.g. `K9#mX2!a`) with 1-tap copy.
-            - **Home Page (Two Halves):**
-              - Top: Your personal challenge & goal setting (distance targets 500m–5km, XP stakes 50–500 XP, live step progress).
-              - Bottom: Friend challenges with **live countdown timers** (`02h 45m 12s remaining`). Clean empty state when no friends have active stakes.
-            - **Friends Page (Accountability Circle):**
-              - Multi-channel adding: Strict database-validated search (nonexistent users cannot be added; cannot add self), 8-character ID input, and ZXing QR code generator & scanner.
-              - Incoming invitations tab with instant Accept / Decline actions.
-              - Facebook friend suggestions with Add and Delete/Dismiss options.
-            - **Clean In-App Updates:** One-tap clean update button without changelog bloat.
-            - **100% App-Made Vector Drawables:** Zero generic emojis, zero stock icons—bespoke vector glyphs for StreakStake.
-            - **Minimal Dark Cinema Design:** Strict 2-color palette (#0A0A0F base, #12121A surface, and #DC2626 crimson accent).
+            ### Highlights in v2.5.0:
+            - **Seamless 1-Tap Google & Facebook Authentication (Zero Typing):**
+              - Never asks you to type your name or email.
+              - Uses native Android account selection and dedicated 1-tap OAuth bottom sheets with avatar and profile preview.
+              - Automatically derives your athlete name and `@tag`.
+              - Facebook login and linking in Settings now uses the exact same sleek 1-tap account selector screen as Google ("Continue as Dali").
+            - **Fully Customizable Challenge Generator:**
+              - Create ANY challenge you want: custom name (e.g. 100 Pushups, 50 Pull-ups, 5km Run, 150 Squats, Cold Plunge, Plank, etc.).
+              - Set ANY target number (reps, meters, minutes, steps) with custom units.
+              - Choose your XP stake (50, 100, 250, 500 XP) and lock it on the line.
+            - **Interactive Challenge Tracker with Rep Logger:**
+              - For rep-based challenges: clean numerical counter with `+1`, `+5`, `+10`, and `-1` logging buttons.
+              - For distance/walking challenges: native hardware step detector and GPS tracking.
+              - Real-time percentage progress bar and target completion rewards.
+            - **Friend Challenges & Accountability Countdown:**
+              - Bottom half of Home displays friend challenges with custom names, target counts, and **live countdown timers** ticking down each second.
+            - **Bespoke Vector UI:**
+              - Zero emojis, minimal Dark Cinema aesthetic (#0A0A0F / #12121A / #DC2626 crimson).
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

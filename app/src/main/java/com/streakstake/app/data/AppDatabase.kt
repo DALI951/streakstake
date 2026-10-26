@@ -452,17 +452,21 @@ class AppDatabase(context: Context) {
         )
         saveAllUsers(seedUsers)
 
-        // Seed active challenges with live countdown timers
+        // Seed active challenges with live countdown timers (reps, distance, calisthenics)
         val seedStakes = listOf(
             Stake(
                 id = "stk_marcus_1",
                 creatorId = "usr_marcus",
                 creatorName = "Marcus Chen",
                 creatorHandle = "@marcus_fit",
-                title = "Sprint Interval 2.5km",
-                targetMeters = 2500,
-                currentMeters = 1400,
-                stepsCount = 1850,
+                title = "100 Diamond Pushups",
+                challengeType = "REPS",
+                targetValue = 100,
+                currentValue = 65,
+                unit = "reps",
+                targetMeters = 0,
+                currentMeters = 0,
+                stepsCount = 0,
                 stakeXp = 200,
                 status = StakeStatus.ACTIVE,
                 deadlineMillis = now + (2 * 3600 * 1000L) + (45 * 60 * 1000L) // 2h 45m from now
@@ -473,6 +477,10 @@ class AppDatabase(context: Context) {
                 creatorName = "Sarah Connor",
                 creatorHandle = "@sarah_c",
                 title = "Morning Trail Walk 3km",
+                challengeType = "DISTANCE",
+                targetValue = 3000,
+                currentValue = 2100,
+                unit = "meters",
                 targetMeters = 3000,
                 currentMeters = 2100,
                 stepsCount = 2800,
@@ -485,11 +493,15 @@ class AppDatabase(context: Context) {
                 creatorId = "usr_elena",
                 creatorName = "Elena Rostova",
                 creatorHandle = "@elena_r",
-                title = "Power Walk 1km",
-                targetMeters = 1000,
-                currentMeters = 400,
-                stepsCount = 520,
-                stakeXp = 100,
+                title = "50 Strict Pull-ups",
+                challengeType = "REPS",
+                targetValue = 50,
+                currentValue = 28,
+                unit = "reps",
+                targetMeters = 0,
+                currentMeters = 0,
+                stepsCount = 0,
+                stakeXp = 150,
                 status = StakeStatus.ACTIVE,
                 deadlineMillis = now + (3 * 3600 * 1000L) + (30 * 60 * 1000L) // 3h 30m from now
             )

@@ -199,12 +199,12 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <!-- TOP HALF: YOUR ACTIVE CHALLENGE / GOAL SETTING -->
+                <!-- TOP HALF: YOUR ACTIVE CHALLENGE / CUSTOM GOAL CREATOR -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:letterSpacing="0.06"
-                    android:text="YOUR CHALLENGE"
+                    android:text="YOUR ACTIVE CHALLENGE"
                     android:textColor="@color/accent_light"
                     android:textSize="11sp"
                     android:textStyle="bold" />
@@ -232,7 +232,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:fontFamily="sans-serif-bold"
-                            android:text="Walk Distance Challenge"
+                            android:text="100 Pushups Challenge"
                             android:textColor="@color/text_primary"
                             android:textSize="15sp" />
 
@@ -256,8 +256,8 @@
                         android:layout_height="6dp"
                         android:layout_marginTop="12dp"
                         android:indeterminate="false"
-                        android:max="1000"
-                        android:progress="320"
+                        android:max="100"
+                        android:progress="35"
                         android:progressBackgroundTint="@color/surface_high"
                         android:progressTint="@color/accent" />
 
@@ -268,20 +268,20 @@
                         android:orientation="horizontal">
 
                         <TextView
-                            android:id="@+id/tvActiveStakeDistanceText"
+                            android:id="@+id/tvActiveStakeProgressText"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="320m / 1,000m target"
+                            android:text="35 / 100 reps completed"
                             android:textColor="@color/text_secondary"
                             android:textSize="12sp" />
 
                         <TextView
-                            android:id="@+id/tvActiveStakeStepsText"
+                            android:id="@+id/tvActiveStakePercentText"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="420 steps"
-                            android:textColor="@color/text_primary"
+                            android:text="35%"
+                            android:textColor="@color/accent_light"
                             android:textSize="12sp"
                             android:textStyle="bold" />
                     </LinearLayout>
@@ -293,14 +293,14 @@
                         android:layout_marginTop="12dp"
                         android:background="@drawable/btn_accent_primary"
                         android:fontFamily="sans-serif-bold"
-                        android:text="Start Walking / GPS Motion Tracker"
+                        android:text="Open Tracker &amp; Log Progress"
                         android:textAllCaps="false"
                         android:textColor="@color/on_accent"
                         android:textSize="13sp"
                         app:backgroundTint="@null" />
                 </LinearLayout>
 
-                <!-- Goal Staking Creator Card -->
+                <!-- Fully Customizable Challenge Creator Card -->
                 <LinearLayout
                     android:id="@+id/layoutGoalCreator"
                     android:layout_width="match_parent"
@@ -314,11 +314,25 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:letterSpacing="0.04"
-                        android:text="CHOOSE WALKING DISTANCE TARGET"
+                        android:text="CHALLENGE NAME"
                         android:textColor="@color/text_secondary"
                         android:textSize="10sp"
                         android:textStyle="bold" />
 
+                    <!-- Custom Challenge Title Input -->
+                    <EditText
+                        android:id="@+id/etChallengeTitleInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="44dp"
+                        android:layout_marginTop="6dp"
+                        android:background="@drawable/bg_input_field"
+                        android:hint="e.g. 100 Pushups, 50 Pull-ups, 3km Run"
+                        android:paddingHorizontal="12dp"
+                        android:textColor="@color/text_primary"
+                        android:textColorHint="@color/text_disabled"
+                        android:textSize="13sp" />
+
+                    <!-- Quick Preset Chips -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -326,58 +340,164 @@
                         android:orientation="horizontal">
 
                         <Button
-                            android:id="@+id/btnDist500"
+                            android:id="@+id/btnPresetPushups"
                             android:layout_width="0dp"
-                            android:layout_height="40dp"
+                            android:layout_height="32dp"
                             android:layout_marginEnd="4dp"
                             android:layout_weight="1"
                             android:background="@drawable/bg_pill_chip_active"
-                            android:text="500m"
+                            android:text="Pushups"
                             android:textColor="@color/on_accent"
-                            android:textSize="12sp"
+                            android:textSize="11sp"
                             android:textStyle="bold"
                             app:backgroundTint="@null" />
 
                         <Button
-                            android:id="@+id/btnDist1000"
+                            android:id="@+id/btnPresetPullups"
                             android:layout_width="0dp"
-                            android:layout_height="40dp"
+                            android:layout_height="32dp"
                             android:layout_marginHorizontal="4dp"
                             android:layout_weight="1"
                             android:background="@drawable/bg_pill_chip"
-                            android:text="1.0km"
+                            android:text="Pull-ups"
                             android:textColor="@color/text_primary"
-                            android:textSize="12sp"
+                            android:textSize="11sp"
                             android:textStyle="bold"
                             app:backgroundTint="@null" />
 
                         <Button
-                            android:id="@+id/btnDist2500"
+                            android:id="@+id/btnPresetSquats"
                             android:layout_width="0dp"
-                            android:layout_height="40dp"
+                            android:layout_height="32dp"
                             android:layout_marginHorizontal="4dp"
                             android:layout_weight="1"
                             android:background="@drawable/bg_pill_chip"
-                            android:text="2.5km"
+                            android:text="Squats"
                             android:textColor="@color/text_primary"
-                            android:textSize="12sp"
+                            android:textSize="11sp"
                             android:textStyle="bold"
                             app:backgroundTint="@null" />
 
                         <Button
-                            android:id="@+id/btnDist5000"
+                            android:id="@+id/btnPresetWalk"
                             android:layout_width="0dp"
-                            android:layout_height="40dp"
+                            android:layout_height="32dp"
                             android:layout_marginStart="4dp"
                             android:layout_weight="1"
                             android:background="@drawable/bg_pill_chip"
-                            android:text="5.0km"
+                            android:text="Walk/Run"
                             android:textColor="@color/text_primary"
-                            android:textSize="12sp"
+                            android:textSize="11sp"
                             android:textStyle="bold"
                             app:backgroundTint="@null" />
                     </LinearLayout>
 
+                    <!-- Target Number & Unit Inputs -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="14dp"
+                        android:orientation="horizontal">
+
+                        <!-- Target Number -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="8dp"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:letterSpacing="0.04"
+                                android:text="TARGET NUMBER"
+                                android:textColor="@color/text_secondary"
+                                android:textSize="10sp"
+                                android:textStyle="bold" />
+
+                            <EditText
+                                android:id="@+id/etTargetNumberInput"
+                                android:layout_width="match_parent"
+                                android:layout_height="44dp"
+                                android:layout_marginTop="6dp"
+                                android:background="@drawable/bg_input_field"
+                                android:hint="100"
+                                android:inputType="number"
+                                android:paddingHorizontal="12dp"
+                                android:text="100"
+                                android:textColor="@color/text_primary"
+                                android:textColorHint="@color/text_disabled"
+                                android:textSize="14sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                        <!-- Unit Selector -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:layout_weight="1.2"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:letterSpacing="0.04"
+                                android:text="UNIT"
+                                android:textColor="@color/text_secondary"
+                                android:textSize="10sp"
+                                android:textStyle="bold" />
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="44dp"
+                                android:layout_marginTop="6dp"
+                                android:orientation="horizontal">
+
+                                <Button
+                                    android:id="@+id/btnUnitReps"
+                                    android:layout_width="0dp"
+                                    android:layout_height="match_parent"
+                                    android:layout_marginEnd="2dp"
+                                    android:layout_weight="1"
+                                    android:background="@drawable/bg_pill_chip_active"
+                                    android:text="Reps"
+                                    android:textColor="@color/on_accent"
+                                    android:textSize="11sp"
+                                    android:textStyle="bold"
+                                    app:backgroundTint="@null" />
+
+                                <Button
+                                    android:id="@+id/btnUnitMeters"
+                                    android:layout_width="0dp"
+                                    android:layout_height="match_parent"
+                                    android:layout_marginHorizontal="2dp"
+                                    android:layout_weight="1"
+                                    android:background="@drawable/bg_pill_chip"
+                                    android:text="Meters"
+                                    android:textColor="@color/text_primary"
+                                    android:textSize="11sp"
+                                    android:textStyle="bold"
+                                    app:backgroundTint="@null" />
+
+                                <Button
+                                    android:id="@+id/btnUnitMins"
+                                    android:layout_width="0dp"
+                                    android:layout_height="match_parent"
+                                    android:layout_marginStart="2dp"
+                                    android:layout_weight="1"
+                                    android:background="@drawable/bg_pill_chip"
+                                    android:text="Mins"
+                                    android:textColor="@color/text_primary"
+                                    android:textSize="11sp"
+                                    android:textStyle="bold"
+                                    app:backgroundTint="@null" />
+                            </LinearLayout>
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <!-- Lock XP Stake -->
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -454,7 +574,7 @@
                         android:layout_marginTop="16dp"
                         android:background="@drawable/btn_accent_primary"
                         android:fontFamily="sans-serif-bold"
-                        android:text="Lock Stake &amp; Start Walking"
+                        android:text="Lock Stake &amp; Start Challenge"
                         android:textAllCaps="false"
                         android:textColor="@color/on_accent"
                         android:textSize="13sp"

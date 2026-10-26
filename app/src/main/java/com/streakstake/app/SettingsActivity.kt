@@ -95,65 +95,36 @@ class SettingsActivity : AppCompatActivity() {
 
     private fun showLinkFacebookDialog() {
         val user = prefs.getCurrentUser() ?: return
-        val builder = AlertDialog.Builder(this)
-        val layout = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(48, 36, 48, 24)
-            setBackgroundColor(Color.parseColor("#12121A"))
-        }
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_facebook_account_picker, null)
+        val tvName = dialogView.findViewById<TextView>(R.id.tvFbAccountName)
+        val tvEmail = dialogView.findViewById<TextView>(R.id.tvFbAccountEmail)
+        val tvAvatar = dialogView.findViewById<TextView>(R.id.tvFbAvatarInitial)
+        val btnContinue = dialogView.findViewById<Button>(R.id.btnFbContinue)
+        val btnCancel = dialogView.findViewById<Button>(R.id.btnFbCancel)
 
-        val title = TextView(this).apply {
-            text = "Link Facebook Account"
-            setTextColor(Color.parseColor("#F2F2F5"))
-            textSize = 17f
-            typeface = android.graphics.Typeface.DEFAULT_BOLD
-        }
-        val sub = TextView(this).apply {
-            text = "Connect your Facebook profile so friends using StreakStake can find you and your account stays backed up."
-            setTextColor(Color.parseColor("#9CA3AF"))
-            textSize = 13f
-            setPadding(0, 8, 0, 16)
-        }
-        val etFbName = EditText(this).apply {
-            hint = "Facebook Name"
-            setHintTextColor(Color.parseColor("#55555F"))
-            setTextColor(Color.parseColor("#F2F2F5"))
-            setBackgroundResource(R.drawable.bg_input_field)
-            setPadding(32, 24, 32, 24)
-        }
-        val btnSubmit = Button(this).apply {
-            text = "Confirm & Link Account"
-            setTextColor(Color.WHITE)
-            setBackgroundResource(R.drawable.btn_accent_primary)
-            val params = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-            params.topMargin = 24
-            layoutParams = params
-        }
+        val fbName = user.name.ifEmpty { "Dali" }
+        tvName.text = fbName
+        tvEmail.text = "Link ${user.username} with Facebook profile"
+        tvAvatar.text = fbName.take(1).uppercase()
+        btnContinue.text = "Link as $fbName"
 
-        layout.addView(title)
-        layout.addView(sub)
-        layout.addView(etFbName)
-        layout.addView(btnSubmit)
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(true)
+            .create()
 
-        val dialog = builder.setView(layout).create()
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 
-        btnSubmit.setOnClickListener {
-            val fbName = etFbName.text.toString().trim()
-            if (fbName.isEmpty()) {
-                Toast.makeText(this, "Please enter your Facebook name", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
+        btnContinue.setOnClickListener {
             val fbId = "fb_" + UUID.nameUUIDFromBytes(fbName.toByteArray()).toString().take(10)
             val updated = db.linkFacebookAccount(user, fbId)
             prefs.saveCurrentUser(updated)
             dialog.dismiss()
-            Toast.makeText(this, "Facebook account linked successfully!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Facebook account linked as $fbName!", Toast.LENGTH_SHORT).show()
             setupAccountLinking()
         }
+
+        btnCancel.setOnClickListener { dialog.dismiss() }
 
         dialog.show()
     }

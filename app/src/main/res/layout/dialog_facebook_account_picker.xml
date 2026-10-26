@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_card_dark"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <!-- Facebook Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            android:contentDescription="Facebook"
+            android:src="@drawable/ic_app_facebook" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:fontFamily="sans-serif-bold"
+            android:text="Continue with Facebook"
+            android:textColor="@color/text_primary"
+            android:textSize="18sp" />
+    </LinearLayout>
+
+    <!-- Profile Avatar Card -->
+    <TextView
+        android:id="@+id/tvFbAvatarInitial"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_marginTop="24dp"
+        android:background="@drawable/bg_circle_avatar"
+        android:gravity="center"
+        android:text="D"
+        android:textColor="@color/accent_light"
+        android:textSize="26sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/tvFbAccountName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:fontFamily="sans-serif-bold"
+        android:text="Dali"
+        android:textColor="@color/text_primary"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/tvFbAccountEmail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:text="Connected as Dali • Facebook Profile"
+        android:textColor="@color/text_secondary"
+        android:textSize="12sp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
+        android:lineSpacingExtra="2dp"
+        android:text="StreakStake will receive your name and profile picture to sync with fitness friends. StreakStake will never post to Facebook."
+        android:textColor="@color/text_secondary"
+        android:textSize="12sp" />
+
+    <!-- 1-Tap Continue Button (Zero Typing) -->
+    <Button
+        android:id="@+id/btnFbContinue"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginTop="24dp"
+        android:background="@drawable/btn_accent_primary"
+        android:fontFamily="sans-serif-bold"
+        android:text="Continue as Dali"
+        android:textAllCaps="false"
+        android:textColor="@color/on_accent"
+        android:textSize="14sp" />
+
+    <Button
+        android:id="@+id/btnFbCancel"
+        android:layout_width="match_parent"
+        android:layout_height="42dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/btn_outlined_hairline"
+        android:fontFamily="sans-serif-medium"
+        android:text="Cancel"
+        android:textAllCaps="false"
+        android:textColor="@color/text_secondary"
+        android:textSize="13sp" />
+
+</LinearLayout>

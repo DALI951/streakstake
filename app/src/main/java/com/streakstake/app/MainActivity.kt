@@ -41,8 +41,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var db: AppDatabase
     private var currentUser: User? = null
 
-    // Goal creation selection
-    private var selectedMeters = 500
+    // Custom Goal creation selection
+    private var selectedChallengeTitle = "100 Pushups"
+    private var selectedTargetNumber = 100
+    private var selectedUnit = "reps"
+    private var selectedChallengeType = "REPS"
     private var selectedStakeXp = 100
 
     // Main Navigation: 0 = Home, 1 = Friends
@@ -90,7 +93,7 @@ class MainActivity : AppCompatActivity() {
 
         setupHeader()
         setupBottomNav()
-        setupDistanceSelector()
+        setupCustomChallengeCreator()
         setupStakeSelector()
         setupGoalLocking()
         setupFriendsPage()
@@ -207,23 +210,30 @@ class MainActivity : AppCompatActivity() {
             binding.layoutActiveStakeCard.visibility = View.VISIBLE
             binding.layoutGoalCreator.visibility = View.GONE
 
+            val target = if (activeStake.targetValue > 0) activeStake.targetValue else activeStake.targetMeters
+            val current = if (activeStake.targetValue > 0) activeStake.currentValue else activeStake.currentMeters
+            val progressPercent = if (target > 0) ((current * 100) / target).coerceIn(0, 100) else 0
+
             binding.tvActiveStakeTitle.text = activeStake.title
             binding.tvActiveStakeXpBadge.text = "${activeStake.stakeXp} XP Locked"
-            binding.pbActiveStakeProgress.max = activeStake.targetMeters
-            binding.pbActiveStakeProgress.progress = activeStake.currentMeters
-            binding.tvActiveStakeDistanceText.text = "${activeStake.currentMeters}m / ${activeStake.targetMeters}m target"
-            binding.tvActiveStakeStepsText.text = "${activeStake.stepsCount} steps"
+            binding.pbActiveStakeProgress.max = 100
+            binding.pbActiveStakeProgress.progress = progressPercent
+            binding.tvActiveStakeProgressText.text = "$current / $target ${activeStake.unit} completed"
+            binding.tvActiveStakePercentText.text = "$progressPercent%"
 
+            binding.btnOpenWalkTracker.text = "Open Tracker: ${activeStake.title}"
             binding.btnOpenWalkTracker.setOnClickListener {
                 val intent = Intent(this, WalkTrackerActivity::class.java).apply {
                     putExtra(WalkTrackerActivity.EXTRA_STAKE_ID, activeStake.id)
+                    putExtra("TARGET_COUNT", target)
                     putExtra(WalkTrackerActivity.EXTRA_TARGET_METERS, activeStake.targetMeters)
                     putExtra(WalkTrackerActivity.EXTRA_STAKE_XP, activeStake.stakeXp)
+                    putExtra("TITLE", activeStake.title)
                 }
                 startActivity(intent)
             }
         } else {
-            // Show goal setter
+            // Show custom goal creator
             binding.layoutActiveStakeCard.visibility = View.GONE
             binding.layoutGoalCreator.visibility = View.VISIBLE
         }
@@ -263,9 +273,12 @@ class MainActivity : AppCompatActivity() {
                 tvHandle.text = stake.creatorHandle
                 tvStakeXp.text = "${stake.stakeXp} XP"
                 tvTitle.text = stake.title
-                tvTarget.text = "Target: ${stake.targetMeters}m • 1.5x Multiplier"
 
-                val progress = if (stake.targetMeters > 0) ((stake.currentMeters * 100) / stake.targetMeters).coerceIn(0, 100) else 0
+                val target = if (stake.targetValue > 0) stake.targetValue else stake.targetMeters
+                val current = if (stake.targetValue > 0) stake.currentValue else stake.currentMeters
+                tvTarget.text = "Target: $target ${stake.unit} • 1.5x Multiplier"
+
+                val progress = if (target > 0) ((current * 100) / target).coerceIn(0, 100) else 0
                 tvPercent.text = "$progress%"
 
                 // Register countdown timer
@@ -276,28 +289,76 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupDistanceSelector() {
-        val distButtons = listOf(
-            Pair(binding.btnDist500, 500),
-            Pair(binding.btnDist1000, 1000),
-            Pair(binding.btnDist2500, 2500),
-            Pair(binding.btnDist5000, 5000)
+    private fun setupCustomChallengeCreator() {
+        val activeBg = R.drawable.bg_pill_chip_active
+        val inactiveBg = R.drawable.bg_pill_chip
+        val activeTextColor = ContextCompat.getColor(this, R.color.on_accent)
+        val inactiveTextColor = ContextCompat.getColor(this, R.color.text_primary)
+
+        val presetButtons = listOf(
+            Triple(binding.btnPresetPushups, "100 Pushups", Pair(100, "reps")),
+            Triple(binding.btnPresetPullups, "50 Strict Pull-ups", Pair(50, "reps")),
+            Triple(binding.btnPresetSquats, "150 Squats", Pair(150, "reps")),
+            Triple(binding.btnPresetWalk, "Morning 2.5km Walk", Pair(2500, "meters"))
         )
 
-        distButtons.forEach { (btn, distance) ->
+        presetButtons.forEach { (btn, title, config) ->
             btn.setOnClickListener {
-                selectedMeters = distance
-                distButtons.forEach { (b, d) ->
-                    if (d == distance) {
-                        b.setBackgroundResource(R.drawable.bg_pill_chip_active)
-                        b.setTextColor(ContextCompat.getColor(this, R.color.on_accent))
-                    } else {
-                        b.setBackgroundResource(R.drawable.bg_pill_chip)
-                        b.setTextColor(ContextCompat.getColor(this, R.color.text_primary))
-                    }
+                selectedChallengeTitle = title
+                selectedTargetNumber = config.first
+                selectedUnit = config.second
+                selectedChallengeType = if (config.second == "meters") "DISTANCE" else "REPS"
+
+                binding.etChallengeTitleInput.setText(title)
+                binding.etTargetNumberInput.setText(config.first.toString())
+
+                presetButtons.forEach { (b, t, _) ->
+                    val isSelected = t == title
+                    b.setBackgroundResource(if (isSelected) activeBg else inactiveBg)
+                    b.setTextColor(if (isSelected) activeTextColor else inactiveTextColor)
                 }
+
+                updateUnitButtons()
             }
         }
+
+        // Unit Selection Buttons
+        binding.btnUnitReps.setOnClickListener {
+            selectedUnit = "reps"
+            selectedChallengeType = "REPS"
+            updateUnitButtons()
+        }
+        binding.btnUnitMeters.setOnClickListener {
+            selectedUnit = "meters"
+            selectedChallengeType = "DISTANCE"
+            updateUnitButtons()
+        }
+        binding.btnUnitMins.setOnClickListener {
+            selectedUnit = "mins"
+            selectedChallengeType = "TIME"
+            updateUnitButtons()
+        }
+
+        // Default initial values
+        binding.etChallengeTitleInput.setText(selectedChallengeTitle)
+        binding.etTargetNumberInput.setText(selectedTargetNumber.toString())
+        updateUnitButtons()
+    }
+
+    private fun updateUnitButtons() {
+        val activeBg = R.drawable.bg_pill_chip_active
+        val inactiveBg = R.drawable.bg_pill_chip
+        val activeTextColor = ContextCompat.getColor(this, R.color.on_accent)
+        val inactiveTextColor = ContextCompat.getColor(this, R.color.text_primary)
+
+        binding.btnUnitReps.setBackgroundResource(if (selectedUnit == "reps") activeBg else inactiveBg)
+        binding.btnUnitReps.setTextColor(if (selectedUnit == "reps") activeTextColor else inactiveTextColor)
+
+        binding.btnUnitMeters.setBackgroundResource(if (selectedUnit == "meters") activeBg else inactiveBg)
+        binding.btnUnitMeters.setTextColor(if (selectedUnit == "meters") activeTextColor else inactiveTextColor)
+
+        binding.btnUnitMins.setBackgroundResource(if (selectedUnit == "mins") activeBg else inactiveBg)
+        binding.btnUnitMins.setTextColor(if (selectedUnit == "mins") activeTextColor else inactiveTextColor)
     }
 
     private fun setupStakeSelector() {
@@ -328,6 +389,12 @@ class MainActivity : AppCompatActivity() {
         binding.btnLockStake.setOnClickListener {
             val user = currentUser ?: return@setOnClickListener
 
+            val titleInput = binding.etChallengeTitleInput.text.toString().trim()
+            val targetInput = binding.etTargetNumberInput.text.toString().trim().toIntOrNull() ?: 100
+
+            val challengeTitle = if (titleInput.isNotEmpty()) titleInput else "$targetInput $selectedUnit Challenge"
+            val targetVal = if (targetInput > 0) targetInput else 100
+
             if (user.totalXp < selectedStakeXp) {
                 Toast.makeText(this, "Insufficient XP! You need $selectedStakeXp XP to stake.", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
@@ -345,8 +412,12 @@ class MainActivity : AppCompatActivity() {
                 creatorId = user.id,
                 creatorName = user.name,
                 creatorHandle = user.username,
-                title = "Walk ${selectedMeters}m Target",
-                targetMeters = selectedMeters,
+                title = challengeTitle,
+                challengeType = selectedChallengeType,
+                targetValue = targetVal,
+                currentValue = 0,
+                unit = selectedUnit,
+                targetMeters = if (selectedUnit == "meters") targetVal else 0,
                 currentMeters = 0,
                 stepsCount = 0,
                 stakeXp = selectedStakeXp,
@@ -356,13 +427,15 @@ class MainActivity : AppCompatActivity() {
             )
 
             prefs.addStake(newStake)
-            Toast.makeText(this, "Locked $selectedStakeXp XP on ${selectedMeters}m Challenge!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Locked $selectedStakeXp XP on '$challengeTitle'!", Toast.LENGTH_SHORT).show()
 
-            // Open Walk Tracker
+            // Open Challenge Tracker
             val intent = Intent(this, WalkTrackerActivity::class.java).apply {
                 putExtra(WalkTrackerActivity.EXTRA_STAKE_ID, stakeId)
-                putExtra(WalkTrackerActivity.EXTRA_TARGET_METERS, selectedMeters)
+                putExtra("TARGET_COUNT", targetVal)
+                putExtra(WalkTrackerActivity.EXTRA_TARGET_METERS, newStake.targetMeters)
                 putExtra(WalkTrackerActivity.EXTRA_STAKE_XP, selectedStakeXp)
+                putExtra("TITLE", challengeTitle)
             }
             startActivity(intent)
         }

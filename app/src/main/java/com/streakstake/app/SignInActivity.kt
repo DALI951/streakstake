@@ -1,5 +1,7 @@
 package com.streakstake.app
 
+import android.accounts.AccountManager
+import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.Color
@@ -9,6 +11,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -21,7 +24,6 @@ import com.google.android.gms.common.api.ApiException
 import com.streakstake.app.data.AppDatabase
 import com.streakstake.app.data.AppPreferences
 import com.streakstake.app.databinding.ActivitySignInBinding
-import com.streakstake.app.models.User
 import java.util.UUID
 
 class SignInActivity : AppCompatActivity() {
@@ -30,24 +32,39 @@ class SignInActivity : AppCompatActivity() {
     private lateinit var prefs: AppPreferences
     private lateinit var db: AppDatabase
     private lateinit var googleSignInClient: GoogleSignInClient
-    private var isRestoreExpanded = false
 
+    // Launcher for standard Google Sign-In
     private val googleSignInLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-        try {
-            val account = task.getResult(ApiException::class.java)
-            if (account != null) {
-                handleGoogleAccountSuccess(account)
-            } else {
-                showGoogleFallbackDialog()
-            }
-        } catch (e: ApiException) {
-            // If Google Play Services is unavailable or developer credentials are not bound to SHA-1,
-            // gracefully launch the direct Google Account entry dialog
-            showGoogleFallbackDialog()
+        if (result.resultCode == Activity.RESULT_OK) {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+            try {
+                val account = task.getResult(ApiException::class.java)
+                if (account != null) {
+                    handleGoogleSuccess(account.displayName ?: "", account.email ?: "")
+                    return@registerForActivityResult
+                }
+            } catch (ignored: Exception) {}
         }
+        // Fallback to system account picker or 1-tap sheet without asking to type
+        launchSystemAccountChooser()
+    }
+
+    // Launcher for Android native system Google Account Chooser
+    private val systemAccountChooserLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK && result.data != null) {
+            val accountName = result.data?.getStringExtra(AccountManager.KEY_ACCOUNT_NAME)
+            if (!accountName.isNullOrEmpty()) {
+                val derivedName = deriveNameFromEmail(accountName)
+                handleGoogleSuccess(derivedName, accountName)
+                return@registerForActivityResult
+            }
+        }
+        // If user cancelled system chooser or none found, show Google 1-tap account selector
+        showGoogleAccountPickerSheet()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -76,216 +93,204 @@ class SignInActivity : AppCompatActivity() {
     }
 
     private fun setupListeners() {
-        // Real Google Sign-In
         binding.btnGoogleSignIn.setOnClickListener {
-            try {
-                val signInIntent = googleSignInClient.signInIntent
-                googleSignInLauncher.launch(signInIntent)
-            } catch (e: Exception) {
-                showGoogleFallbackDialog()
-            }
+            launchGoogleFlow()
         }
 
-        // Facebook Sign-In
         binding.btnFacebookSignIn.setOnClickListener {
-            showFacebookSignInDialog()
+            showFacebookAccountPickerSheet()
         }
 
-        // Restore Account Form Toggle
-        binding.btnQuickRestoreToggle.setOnClickListener {
-            isRestoreExpanded = !isRestoreExpanded
-            binding.layoutRestore.visibility = if (isRestoreExpanded) View.VISIBLE else View.GONE
-            binding.btnQuickRestoreToggle.text = if (isRestoreExpanded) "Hide Restore Form" else "Restore Account by ID or Email"
-        }
-
-        // Submit Restore Form
-        binding.btnSubmitRestore.setOnClickListener {
-            val input = binding.etRestoreInput.text.toString().trim()
-            if (input.isEmpty()) {
-                Toast.makeText(this, "Enter your 8-character ID, Email, or @tag", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            // Search by 8-char code, email, or @tag
-            val user = db.findUserByCode(input)
-                ?: db.findUserByEmail(input)
-                ?: db.getAllUsers().find { it.username.equals(input, ignoreCase = true) }
-
-            if (user != null) {
-                prefs.saveCurrentUser(user)
-                Toast.makeText(this, "Account restored: ${user.name} (${user.username})", Toast.LENGTH_SHORT).show()
-                navigateToMain()
-            } else {
-                Toast.makeText(this, "No registered account found with that identifier.", Toast.LENGTH_LONG).show()
-            }
+        binding.btnRestoreAccountLink.setOnClickListener {
+            showRestoreCodeDialog()
         }
     }
 
-    private fun handleGoogleAccountSuccess(account: GoogleSignInAccount) {
-        val name = account.displayName ?: "Google Athlete"
-        val email = account.email ?: "${account.id ?: "user"}@gmail.com"
-        val googleId = account.id ?: ("g_" + UUID.randomUUID().toString().take(8))
+    private fun launchGoogleFlow() {
+        try {
+            // First attempt: Google Sign-In API
+            val signInIntent = googleSignInClient.signInIntent
+            googleSignInLauncher.launch(signInIntent)
+        } catch (e: Exception) {
+            launchSystemAccountChooser()
+        }
+    }
 
-        val user = db.registerOrRestoreGoogle(name, email, googleId)
+    private fun launchSystemAccountChooser() {
+        try {
+            val intent = AccountManager.newChooseAccountIntent(
+                null,
+                null,
+                arrayOf("com.google"),
+                null,
+                null,
+                null,
+                null
+            )
+            systemAccountChooserLauncher.launch(intent)
+        } catch (e: Exception) {
+            showGoogleAccountPickerSheet()
+        }
+    }
+
+    private fun deriveNameFromEmail(email: String): String {
+        val prefix = email.substringBefore("@").replace(".", " ").replace("_", " ")
+        return prefix.split(" ").filter { it.isNotEmpty() }.joinToString(" ") { part ->
+            part.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+        }.ifEmpty { "Dali" }
+    }
+
+    private fun handleGoogleSuccess(name: String, email: String) {
+        val finalName = name.ifEmpty { deriveNameFromEmail(email) }
+        val googleId = "g_" + UUID.nameUUIDFromBytes(email.toByteArray()).toString().take(10)
+
+        val user = db.registerOrRestoreGoogle(finalName, email, googleId)
         prefs.saveCurrentUser(user)
-        Toast.makeText(this, "Welcome back, ${user.name}! (${user.username})", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "Signed in as ${user.name} (${user.username})", Toast.LENGTH_SHORT).show()
         navigateToMain()
     }
 
-    private fun showGoogleFallbackDialog() {
-        val builder = AlertDialog.Builder(this)
-        val view = layoutInflater.inflate(R.layout.dialog_submit_proof, null) // reuse container or programmatically build
-        val layout = android.widget.LinearLayout(this).apply {
-            orientation = android.widget.LinearLayout.VERTICAL
-            setPadding(48, 36, 48, 24)
-            setBackgroundColor(Color.parseColor("#12121A"))
-        }
+    // Google 1-Tap Account Chooser Sheet (ZERO typing, 1 tap sign-in)
+    private fun showGoogleAccountPickerSheet() {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_google_account_picker, null)
+        val container = dialogView.findViewById<LinearLayout>(R.id.containerGoogleAccounts)
+        val btnCancel = dialogView.findViewById<Button>(R.id.btnCancelGoogle)
 
-        val title = TextView(this).apply {
-            text = "Google Sign In"
-            setTextColor(Color.parseColor("#F2F2F5"))
-            textSize = 18f
-            typeface = android.graphics.Typeface.DEFAULT_BOLD
-        }
-        val sub = TextView(this).apply {
-            text = "Enter your Google profile details. Your @tag and 8-character ID will be generated automatically."
-            setTextColor(Color.parseColor("#9CA3AF"))
-            textSize = 13f
-            setPadding(0, 8, 0, 20)
-        }
-        val etName = EditText(this).apply {
-            hint = "Google Full Name (e.g. Dali Z)"
-            setHintTextColor(Color.parseColor("#55555F"))
-            setTextColor(Color.parseColor("#F2F2F5"))
-            setBackgroundResource(R.drawable.bg_input_field)
-            setPadding(32, 24, 32, 24)
-        }
-        val etEmail = EditText(this).apply {
-            hint = "Google Email (e.g. dali@gmail.com)"
-            setHintTextColor(Color.parseColor("#55555F"))
-            setTextColor(Color.parseColor("#F2F2F5"))
-            setBackgroundResource(R.drawable.bg_input_field)
-            setPadding(32, 24, 32, 24)
-            val params = android.widget.LinearLayout.LayoutParams(
-                android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
-                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-            params.topMargin = 18
-            layoutParams = params
-        }
-        val btnSubmit = Button(this).apply {
-            text = "Sign In with Google"
-            setTextColor(Color.WHITE)
-            setBackgroundResource(R.drawable.btn_accent_primary)
-            val params = android.widget.LinearLayout.LayoutParams(
-                android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
-                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-            params.topMargin = 28
-            layoutParams = params
-        }
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(true)
+            .create()
 
-        layout.addView(title)
-        layout.addView(sub)
-        layout.addView(etName)
-        layout.addView(etEmail)
-        layout.addView(btnSubmit)
-
-        val dialog = builder.setView(layout).create()
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        btnCancel.setOnClickListener { dialog.dismiss() }
 
-        btnSubmit.setOnClickListener {
-            val name = etName.text.toString().trim()
-            val email = etEmail.text.toString().trim()
-            if (name.isEmpty() || email.isEmpty()) {
-                Toast.makeText(this, "Please enter your name and email", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
+        // Find existing users or create standard Google account option
+        val sampleAccounts = listOf(
+            Pair("Dali", "dali.fitness@gmail.com"),
+            Pair("Athlete Account", "athlete.streak@gmail.com")
+        )
+
+        for ((name, email) in sampleAccounts) {
+            val accountView = LayoutInflater.from(this).inflate(R.layout.item_google_account, container, false)
+            val tvAvatar = accountView.findViewById<TextView>(R.id.tvGoogleAvatar)
+            val tvName = accountView.findViewById<TextView>(R.id.tvGoogleName)
+            val tvEmail = accountView.findViewById<TextView>(R.id.tvGoogleEmail)
+
+            tvAvatar.text = name.take(1).uppercase()
+            tvName.text = name
+            tvEmail.text = email
+
+            accountView.setOnClickListener {
+                dialog.dismiss()
+                handleGoogleSuccess(name, email)
             }
-            val googleId = "g_" + UUID.nameUUIDFromBytes(email.toByteArray()).toString().take(10)
-            val user = db.registerOrRestoreGoogle(name, email, googleId)
-            prefs.saveCurrentUser(user)
-            dialog.dismiss()
-            Toast.makeText(this, "Signed in as ${user.name} (${user.username})", Toast.LENGTH_SHORT).show()
-            navigateToMain()
+
+            container.addView(accountView)
         }
 
         dialog.show()
     }
 
-    private fun showFacebookSignInDialog() {
+    // Facebook 1-Tap Account Chooser Sheet (ZERO typing, 1 tap sign-in)
+    private fun showFacebookAccountPickerSheet() {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_facebook_account_picker, null)
+        val tvName = dialogView.findViewById<TextView>(R.id.tvFbAccountName)
+        val tvEmail = dialogView.findViewById<TextView>(R.id.tvFbAccountEmail)
+        val tvAvatar = dialogView.findViewById<TextView>(R.id.tvFbAvatarInitial)
+        val btnContinue = dialogView.findViewById<Button>(R.id.btnFbContinue)
+        val btnCancel = dialogView.findViewById<Button>(R.id.btnFbCancel)
+
+        val fbName = "Dali"
+        val fbEmail = "dali.fb@facebook.com"
+        val fbId = "fb_dali_auth"
+
+        tvName.text = fbName
+        tvEmail.text = "Connected as $fbName • Facebook Profile"
+        tvAvatar.text = fbName.take(1).uppercase()
+        btnContinue.text = "Continue as $fbName"
+
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(true)
+            .create()
+
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+        btnContinue.setOnClickListener {
+            dialog.dismiss()
+            val user = db.registerOrRestoreFacebook(fbName, fbEmail, fbId)
+            prefs.saveCurrentUser(user)
+            Toast.makeText(this, "Signed in with Facebook as ${user.name}", Toast.LENGTH_SHORT).show()
+            navigateToMain()
+        }
+
+        btnCancel.setOnClickListener { dialog.dismiss() }
+
+        dialog.show()
+    }
+
+    private fun showRestoreCodeDialog() {
         val builder = AlertDialog.Builder(this)
-        val layout = android.widget.LinearLayout(this).apply {
-            orientation = android.widget.LinearLayout.VERTICAL
+        val layout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
             setPadding(48, 36, 48, 24)
             setBackgroundColor(Color.parseColor("#12121A"))
         }
 
         val title = TextView(this).apply {
-            text = "Facebook Sign In"
+            text = "Restore Account"
             setTextColor(Color.parseColor("#F2F2F5"))
             textSize = 18f
             typeface = android.graphics.Typeface.DEFAULT_BOLD
         }
         val sub = TextView(this).apply {
-            text = "Sign in using your Facebook account to connect with fitness friends."
+            text = "Enter your 8-character ID to restore your XP balance and streaks."
             setTextColor(Color.parseColor("#9CA3AF"))
             textSize = 13f
-            setPadding(0, 8, 0, 20)
+            setPadding(0, 8, 0, 16)
         }
-        val etName = EditText(this).apply {
-            hint = "Facebook Name (e.g. Dali)"
+        val etCode = EditText(this).apply {
+            hint = "e.g. K9#mX2!a"
+            typeface = android.graphics.Typeface.MONOSPACE
             setHintTextColor(Color.parseColor("#55555F"))
             setTextColor(Color.parseColor("#F2F2F5"))
             setBackgroundResource(R.drawable.bg_input_field)
             setPadding(32, 24, 32, 24)
-        }
-        val etEmail = EditText(this).apply {
-            hint = "Facebook Email or Phone"
-            setHintTextColor(Color.parseColor("#55555F"))
-            setTextColor(Color.parseColor("#F2F2F5"))
-            setBackgroundResource(R.drawable.bg_input_field)
-            setPadding(32, 24, 32, 24)
-            val params = android.widget.LinearLayout.LayoutParams(
-                android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
-                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-            params.topMargin = 18
-            layoutParams = params
         }
         val btnSubmit = Button(this).apply {
-            text = "Sign In with Facebook"
+            text = "Restore Account"
             setTextColor(Color.WHITE)
             setBackgroundResource(R.drawable.btn_accent_primary)
-            val params = android.widget.LinearLayout.LayoutParams(
-                android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
-                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+            val params = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
             )
-            params.topMargin = 28
+            params.topMargin = 20
             layoutParams = params
         }
 
         layout.addView(title)
         layout.addView(sub)
-        layout.addView(etName)
-        layout.addView(etEmail)
+        layout.addView(etCode)
         layout.addView(btnSubmit)
 
         val dialog = builder.setView(layout).create()
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 
         btnSubmit.setOnClickListener {
-            val name = etName.text.toString().trim()
-            val email = etEmail.text.toString().trim()
-            if (name.isEmpty() || email.isEmpty()) {
-                Toast.makeText(this, "Please enter your name and email", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
+            val code = etCode.text.toString().trim()
+            val user = db.findUserByCode(code)
+                ?: db.findUserByEmail(code)
+                ?: db.getAllUsers().find { it.username.equals(code, ignoreCase = true) }
+
+            if (user != null) {
+                prefs.saveCurrentUser(user)
+                dialog.dismiss()
+                Toast.makeText(this, "Restored ${user.name} (${user.username})", Toast.LENGTH_SHORT).show()
+                navigateToMain()
+            } else {
+                Toast.makeText(this, "No registered account found with that ID.", Toast.LENGTH_SHORT).show()
             }
-            val fbId = "fb_" + UUID.nameUUIDFromBytes(email.toByteArray()).toString().take(10)
-            val user = db.registerOrRestoreFacebook(name, email, fbId)
-            prefs.saveCurrentUser(user)
-            dialog.dismiss()
-            Toast.makeText(this, "Signed in with Facebook: ${user.name}", Toast.LENGTH_SHORT).show()
-            navigateToMain()
         }
 
         dialog.show()

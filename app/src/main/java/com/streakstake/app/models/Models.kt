@@ -30,8 +30,12 @@ data class Stake(
     val creatorId: String = "",
     val creatorName: String = "",
     val creatorHandle: String = "",
-    val title: String,
-    val targetMeters: Int,
+    var title: String,
+    var challengeType: String = "REPS", // REPS, DISTANCE, TIME, CUSTOM
+    var targetValue: Int = 100,         // Target count (e.g. 100 reps, 2500m, 30 mins)
+    var currentValue: Int = 0,          // Current logged count
+    var unit: String = "reps",          // reps, meters, mins, steps
+    var targetMeters: Int = 0,          // Backwards compatibility for walking
     var currentMeters: Int = 0,
     var stepsCount: Int = 0,
     val stakeXp: Int,
