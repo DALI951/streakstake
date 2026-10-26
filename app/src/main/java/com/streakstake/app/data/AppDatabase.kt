@@ -497,7 +497,7 @@ class AppDatabase(private val context: Context) {
             fromUserAvatar = fromUser.name.take(1).uppercase().ifEmpty { "U" },
             toUserId = toUserId,
             status = "PENDING",
-            timestamp = System.currentTimeMillis()
+            createdAt = System.currentTimeMillis()
         )
         requests.add(newRequest)
         saveAllFriendRequests(requests)

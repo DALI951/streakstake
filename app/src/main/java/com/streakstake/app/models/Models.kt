@@ -14,7 +14,7 @@ data class User(
     var bestStreak: Int = 0,
     var challengesCompleted: Int = 0,
     var challengesFailed: Int = 0,
-    val friendsList: MutableList<String> = mutableListOf(),
+    var friendsList: MutableList<String> = mutableListOf(),
     val dismissedSuggestions: MutableList<String> = mutableListOf()
 )
 
@@ -64,6 +64,7 @@ data class FriendRequest(
     val fromUserName: String,
     val fromUserHandle: String,
     val toUserId: String,
+    var fromUserAvatar: String = "",
     var status: String = "PENDING", // PENDING, ACCEPTED, DECLINED
     val createdAt: Long = System.currentTimeMillis()
 )
@@ -73,6 +74,7 @@ data class AppNotification(
     val userId: String,
     val title: String,
     val message: String,
+    val type: String = "INFO",
     val timestamp: Long = System.currentTimeMillis(),
     var isRead: Boolean = false
 )
