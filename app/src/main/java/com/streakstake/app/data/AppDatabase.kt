@@ -441,7 +441,7 @@ class AppDatabase(context: Context) {
                 name = "Liam Vance",
                 email = "liam.vance@powerwalk.co",
                 username = "@liam_v",
-                uniqueCode = "L9!kQ3$m",
+                uniqueCode = "L9!kQ3#m",
                 linkedProviders = mutableListOf("google"),
                 totalXp = 490,
                 currentStreak = 2,
