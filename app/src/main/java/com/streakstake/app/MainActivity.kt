@@ -113,6 +113,17 @@ class MainActivity : AppCompatActivity() {
             renderFriendsPage()
         }
         startCountdownTimer()
+
+        // Background sync with Firebase Realtime Database
+        db.fullCloudSync {
+            currentUser = prefs.getCurrentUser()
+            updateUserHeader()
+            if (activeMainTab == 0) {
+                renderHomePage()
+            } else {
+                renderFriendsPage()
+            }
+        }
     }
 
     override fun onPause() {
@@ -477,6 +488,11 @@ class MainActivity : AppCompatActivity() {
         binding.layoutSubSuggestions.visibility = if (subTabIndex == 2) View.VISIBLE else View.GONE
 
         renderFriendsPage()
+        if (subTabIndex == 1) {
+            db.syncInvitationsFromCloud {
+                renderFriendsPage()
+            }
+        }
     }
 
     private fun renderFriendsPage() {
@@ -492,6 +508,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun renderConfirmedFriendsList() {
+        currentUser = prefs.getCurrentUser()
         val user = currentUser ?: return
         binding.containerFriendsList.removeAllViews()
 
@@ -677,7 +694,61 @@ class MainActivity : AppCompatActivity() {
         btnTabId.setOnClickListener { switchAddOption(1) }
         btnTabQr.setOnClickListener { switchAddOption(2) }
 
-        // 1. Search Database Logic (Strict Validation: Only real accounts, excludes self)
+        // 1. Search Database Logic (Real-time cloud lookup + local matching)
+        fun renderMatches(matches: List<User>) {
+            containerSearchResults.removeAllViews()
+            if (matches.isEmpty()) {
+                tvSearchNotice.text = "No registered athlete found with that name, @tag, or ID."
+                tvSearchNotice.visibility = View.VISIBLE
+            } else {
+                tvSearchNotice.visibility = View.GONE
+                val inflater = LayoutInflater.from(this@MainActivity)
+                val sentRequestIds = db.getSentRequestsForUser(user.id).map { it.toUserId }.toSet()
+
+                for (matchedUser in matches) {
+                    val resultView = inflater.inflate(R.layout.item_search_result, containerSearchResults, false)
+                    val tvAv = resultView.findViewById<TextView>(R.id.tvResultAvatar)
+                    val tvN = resultView.findViewById<TextView>(R.id.tvResultName)
+                    val tvH = resultView.findViewById<TextView>(R.id.tvResultHandle)
+                    val btnAdd = resultView.findViewById<Button>(R.id.btnResultAdd)
+
+                    tvAv.text = matchedUser.name.take(1).uppercase().ifEmpty { "U" }
+                    tvN.text = matchedUser.name
+                    tvH.text = "${matchedUser.username} • ID: ${matchedUser.uniqueCode}"
+
+                    val isAlreadyFriend = user.friendsList.contains(matchedUser.id)
+                    val isPending = sentRequestIds.contains(matchedUser.id)
+
+                    if (isAlreadyFriend) {
+                        btnAdd.text = "Friends"
+                        btnAdd.isEnabled = false
+                        btnAdd.setBackgroundResource(R.drawable.bg_pill_chip)
+                    } else if (isPending) {
+                        btnAdd.text = "Pending"
+                        btnAdd.isEnabled = false
+                        btnAdd.setBackgroundResource(R.drawable.bg_pill_chip)
+                    } else {
+                        btnAdd.text = "+ Invite"
+                        btnAdd.isEnabled = true
+                        btnAdd.setBackgroundResource(R.drawable.bg_pill_chip_active)
+                        btnAdd.setOnClickListener {
+                            val sent = db.sendFriendRequest(user, matchedUser.id)
+                            if (sent) {
+                                btnAdd.text = "Pending"
+                                btnAdd.isEnabled = false
+                                btnAdd.setBackgroundResource(R.drawable.bg_pill_chip)
+                                Toast.makeText(this@MainActivity, "Friend request sent to ${matchedUser.name}!", Toast.LENGTH_SHORT).show()
+                                renderFriendsPage()
+                            } else {
+                                Toast.makeText(this@MainActivity, "Invitation already pending.", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                    containerSearchResults.addView(resultView)
+                }
+            }
+        }
+
         etSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
@@ -690,43 +761,14 @@ class MainActivity : AppCompatActivity() {
                     return
                 }
 
-                val matches = db.searchUsers(query, user.id)
-                if (matches.isEmpty()) {
-                    tvSearchNotice.text = "No registered athlete found with that name, @tag, or ID."
-                    tvSearchNotice.visibility = View.VISIBLE
-                } else {
-                    tvSearchNotice.visibility = View.GONE
-                    val inflater = LayoutInflater.from(this@MainActivity)
-                    for (matchedUser in matches) {
-                        val resultView = inflater.inflate(R.layout.item_search_result, containerSearchResults, false)
-                        val tvAv = resultView.findViewById<TextView>(R.id.tvResultAvatar)
-                        val tvN = resultView.findViewById<TextView>(R.id.tvResultName)
-                        val tvH = resultView.findViewById<TextView>(R.id.tvResultHandle)
-                        val btnAdd = resultView.findViewById<Button>(R.id.btnResultAdd)
+                val localMatches = db.searchUsers(query, user.id)
+                renderMatches(localMatches)
 
-                        tvAv.text = matchedUser.name.take(1).uppercase().ifEmpty { "U" }
-                        tvN.text = matchedUser.name
-                        tvH.text = "${matchedUser.username} • ID: ${matchedUser.uniqueCode}"
-
-                        val isAlreadyFriend = user.friendsList.contains(matchedUser.id)
-                        if (isAlreadyFriend) {
-                            btnAdd.text = "Friends"
-                            btnAdd.isEnabled = false
-                            btnAdd.setBackgroundResource(R.drawable.bg_pill_chip)
-                        } else {
-                            btnAdd.setOnClickListener {
-                                val sent = db.sendFriendRequest(user, matchedUser.id)
-                                if (sent) {
-                                    btnAdd.text = "Sent"
-                                    btnAdd.isEnabled = false
-                                    btnAdd.setBackgroundResource(R.drawable.bg_pill_chip)
-                                    Toast.makeText(this@MainActivity, "Friend request sent to ${matchedUser.name}!", Toast.LENGTH_SHORT).show()
-                                } else {
-                                    Toast.makeText(this@MainActivity, "Invitation already pending.", Toast.LENGTH_SHORT).show()
-                                }
-                            }
-                        }
-                        containerSearchResults.addView(resultView)
+                // Sync with Firebase cloud to discover athletes registered on other phones
+                db.syncUsersFromCloud {
+                    if (etSearch.text.toString().trim() == query) {
+                        val cloudMatches = db.searchUsers(query, user.id)
+                        renderMatches(cloudMatches)
                     }
                 }
             }
@@ -753,19 +795,26 @@ class MainActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            val targetUser = db.findUserByCode(targetCode)
-            if (targetUser == null) {
-                Toast.makeText(this, "No registered athlete matches that 8-character ID.", Toast.LENGTH_LONG).show()
-                return@setOnClickListener
-            }
+            btnSendIdInvite.isEnabled = false
+            btnSendIdInvite.text = "Locating athlete..."
 
-            val sent = db.sendFriendRequest(user, targetUser.id)
-            if (sent) {
-                Toast.makeText(this, "Invitation sent to ${targetUser.name} (${targetUser.username})!", Toast.LENGTH_SHORT).show()
-                dialog.dismiss()
-                renderFriendsPage()
-            } else {
-                Toast.makeText(this, "Invitation already pending or already friends.", Toast.LENGTH_SHORT).show()
+            db.fetchAndFindUserByCode(targetCode) { targetUser ->
+                btnSendIdInvite.isEnabled = true
+                btnSendIdInvite.text = "Send Friend Invite"
+
+                if (targetUser == null) {
+                    Toast.makeText(this, "No registered athlete matches that 8-character ID.", Toast.LENGTH_LONG).show()
+                    return@fetchAndFindUserByCode
+                }
+
+                val sent = db.sendFriendRequest(user, targetUser.id)
+                if (sent) {
+                    Toast.makeText(this, "Invitation sent to ${targetUser.name} (${targetUser.username})!", Toast.LENGTH_SHORT).show()
+                    dialog.dismiss()
+                    renderFriendsPage()
+                } else {
+                    Toast.makeText(this, "Invitation already pending or already friends.", Toast.LENGTH_SHORT).show()
+                }
             }
         }
 
@@ -785,18 +834,25 @@ class MainActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            val targetUser = db.findUserByCode(cleanCode)
-            if (targetUser != null && targetUser.id != user.id) {
-                val sent = db.sendFriendRequest(user, targetUser.id)
-                if (sent) {
-                    Toast.makeText(this, "Connected with ${targetUser.name} via QR!", Toast.LENGTH_SHORT).show()
-                    dialog.dismiss()
-                    renderFriendsPage()
+            btnConnectQr.isEnabled = false
+            btnConnectQr.text = "Connecting..."
+
+            db.fetchAndFindUserByCode(cleanCode) { targetUser ->
+                btnConnectQr.isEnabled = true
+                btnConnectQr.text = "Connect via QR"
+
+                if (targetUser != null && targetUser.id != user.id) {
+                    val sent = db.sendFriendRequest(user, targetUser.id)
+                    if (sent) {
+                        Toast.makeText(this, "Connected with ${targetUser.name} via QR!", Toast.LENGTH_SHORT).show()
+                        dialog.dismiss()
+                        renderFriendsPage()
+                    } else {
+                        Toast.makeText(this, "Already connected or invitation pending.", Toast.LENGTH_SHORT).show()
+                    }
                 } else {
-                    Toast.makeText(this, "Already connected or invitation pending.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Invalid QR code or athlete not found.", Toast.LENGTH_SHORT).show()
                 }
-            } else {
-                Toast.makeText(this, "Invalid QR code or athlete not found.", Toast.LENGTH_SHORT).show()
             }
         }
 

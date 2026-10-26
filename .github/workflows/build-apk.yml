@@ -47,22 +47,29 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
         with:
-          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v2.5.1' }}
-          name: StreakStake Native Android Release ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v2.5.1' }}
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v2.5.2' }}
+          name: StreakStake Native Android Release ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v2.5.2' }}
           draft: false
           prerelease: false
           files: release-artifacts/StreakStake.apk
           body: |
-            ## StreakStake v2.5.1 - Permanent Signature & In-App Auto-Updater
+            ## StreakStake v2.5.2 - Live Multi-Device Cloud Sync & Cross-Device Invites
 
             ### Direct Download
-            - **APK Binary:** [`StreakStake.apk`](https://github.com/DALI951/streakstake/releases/download/v2.5.1/StreakStake.apk)
+            - **APK Binary:** [`StreakStake.apk`](https://github.com/DALI951/streakstake/releases/download/v2.5.2/StreakStake.apk)
 
-            ### Highlights in v2.5.1:
+            ### Highlights in v2.5.2:
+            - **Live Cross-Device Firebase Cloud Database:**
+              - Fixes athlete detection across phones: any registered account on Phone A is immediately discoverable on Phone B by 8-character ID, name, or @tag.
+              - Live invitations: sending an invite immediately syncs to the recipient's phone via Firebase Realtime Database.
+              - Real-time Invites tab: incoming invitations appear with [Accept] and [Decline] options and instant push to mutual friends.
             - **Permanent Cryptographic Signature Keystore:**
-              - Fixes "App not installed" error forever!
-              - App is now signed with a permanent, dedicated keystore across all builds.
-              - Enables flawless 1-tap in-app updates and future updates without signature conflict.
+              - Signed with the permanent keystore for seamless 1-tap in-app updates with zero signature conflicts.
+            - **Custom Challenge Engine & Live Timers:**
+              - Friend challenges with real-time countdown timers.
+              - Custom rep/distance/time goals with dynamic rep counters (+1, +5, +10, -1).
+            - **Bespoke Vector UI:**
+              - Zero emojis, Dark Cinema aesthetic (#0A0A0F / #12121A / #DC2626 crimson).
             - **Rock-Solid In-App Updater:**
               - Follows GitHub multi-hop CDN redirects securely.
               - Pre-validates APK integrity with Android PackageManager before triggering install.

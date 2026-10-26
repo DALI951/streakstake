@@ -1,0 +1,84 @@
+{
+  "project_info": {
+    "project_number": "706687524703",
+    "project_id": "calisthenics-app-77127",
+    "storage_bucket": "calisthenics-app-77127.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:706687524703:android:a53ba5e03f43d4d62ee0ea",
+        "android_client_info": {
+          "package_name": "com.dali951.calisthenics_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "706687524703-2o1438gs6p0bpcbs6ldh3koav7poo6ou.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.dali951.calisthenics_app",
+            "certificate_hash": "f90d0b680471c551a2252f0c4c69109ee97faf4b"
+          }
+        },
+        {
+          "client_id": "706687524703-udug3davorc8r2bl9lvkuus4l0dpott7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.dali951.calisthenics_app",
+            "certificate_hash": "5d9cf6d30f9b56a2b009cd8b87aa9b7f0ea63683"
+          }
+        },
+        {
+          "client_id": "706687524703-l8nboplulqotabpkcfn77p0b1tqk3d04.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAZUO5gyVZUicYWwiLeo9DAIbaEZsf5pBU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "706687524703-l8nboplulqotabpkcfn77p0b1tqk3d04.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:706687524703:android:622d7c9fb4b1364a2ee0ea",
+        "android_client_info": {
+          "package_name": "com.streakstake.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "706687524703-l8nboplulqotabpkcfn77p0b1tqk3d04.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAZUO5gyVZUicYWwiLeo9DAIbaEZsf5pBU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "706687524703-l8nboplulqotabpkcfn77p0b1tqk3d04.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

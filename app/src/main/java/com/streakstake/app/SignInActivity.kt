@@ -279,17 +279,26 @@ class SignInActivity : AppCompatActivity() {
 
         btnSubmit.setOnClickListener {
             val code = etCode.text.toString().trim()
-            val user = db.findUserByCode(code)
-                ?: db.findUserByEmail(code)
-                ?: db.getAllUsers().find { it.username.equals(code, ignoreCase = true) }
+            if (code.isEmpty()) {
+                Toast.makeText(this, "Please enter your ID, email, or @tag", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
 
-            if (user != null) {
-                prefs.saveCurrentUser(user)
-                dialog.dismiss()
-                Toast.makeText(this, "Restored ${user.name} (${user.username})", Toast.LENGTH_SHORT).show()
-                navigateToMain()
-            } else {
-                Toast.makeText(this, "No registered account found with that ID.", Toast.LENGTH_SHORT).show()
+            btnSubmit.isEnabled = false
+            btnSubmit.text = "Searching cloud..."
+
+            db.fetchAndFindUserByCode(code) { user ->
+                btnSubmit.isEnabled = true
+                btnSubmit.text = "Restore Account"
+
+                if (user != null) {
+                    prefs.saveCurrentUser(user)
+                    dialog.dismiss()
+                    Toast.makeText(this, "Restored ${user.name} (${user.username})", Toast.LENGTH_SHORT).show()
+                    navigateToMain()
+                } else {
+                    Toast.makeText(this, "No registered account found with that ID or @tag.", Toast.LENGTH_SHORT).show()
+                }
             }
         }
 
