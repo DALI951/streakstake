@@ -47,29 +47,30 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
         with:
-          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v2.3.0' }}
-          name: StreakStake Native Android Release ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v2.3.0' }}
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v2.4.0' }}
+          name: StreakStake Native Android Release ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v2.4.0' }}
           draft: false
           prerelease: false
           files: release-artifacts/StreakStake.apk
           body: |
-            ## 📱 StreakStake v2.3.0 - Calisthenics Design System Overhaul
+            ## StreakStake v2.4.0 - Complete Core Rebuild
 
-            Completely rebuilt using Dali's Calisthenics "Dark Cinema First" design system (#0A0A0F base, #12121A surface, hairline borders, and the ONE crimson red accent #DC2626).
+            ### Direct Download
+            - **APK Binary:** [`StreakStake.apk`](https://github.com/DALI951/streakstake/releases/download/v2.4.0/StreakStake.apk)
 
-            ### 🚀 Direct Download
-            - **APK Binary:** [`StreakStake.apk`](https://github.com/DALI951/streakstake/releases/download/v2.3.0/StreakStake.apk)
-
-            ### 🌟 Design & Feature Upgrades:
-            - 🎨 **Dali's Calisthenics Design System:** True dark cinema styling with `#0A0A0F` base, `#12121A` surface, hairline borders (`rgba(255, 255, 255, 0.08)`), and the signature `#DC2626` / `#EF4444` crimson red accent.
-            - ⚡ **Instant 1-Tap Google Entry:** Direct entry with zero questions, no email prompt, no personal name used. Grants an anonymous athlete handle and 500 XP starter balance immediately.
-            - 📊 **3-Column Stat Row:** 28sp tabular bold figures for XP balance, active day streak, and verified challenges.
-            - ⚙️ **Calisthenics Profile & Settings Hub:**
-              - Identity card with athlete initial circle avatar, name, handle, and Level XP progress bar.
-              - In-App GitHub Auto-Updater (checks releases, downloads, and launches package installer).
-              - Motion controls: toggle GPS distance tracking and haptic vibration feedback.
-              - Data controls: reset activity data / sign out.
-            - ⚖️ **Peer Verification Hub:** Review pending proofs with 1-tap "Verify" (+1.5x payout) or "Burn".
-            - 🚶 **Native Step & Meter Detector:** Hardware sensor counting + GPS distance tracking.
+            ### Core Features in v2.4.0:
+            - **Native Google Sign-In:** Prompts for real Google accounts with native account selector (`play-services-auth`). Automatically derives user name and `@tag`.
+            - **Facebook Login & Account Linking:** Link Facebook in Settings to save your account and discover Facebook friends using StreakStake. Full account restore on login across Google, Facebook, or unique 8-character ID.
+            - **Unique 8-Character ID:** Cryptographically generated upon account creation containing uppercase, lowercase, numbers, and symbols (e.g. `K9#mX2!a`) with 1-tap copy.
+            - **Home Page (Two Halves):**
+              - Top: Your personal challenge & goal setting (distance targets 500m–5km, XP stakes 50–500 XP, live step progress).
+              - Bottom: Friend challenges with **live countdown timers** (`02h 45m 12s remaining`). Clean empty state when no friends have active stakes.
+            - **Friends Page (Accountability Circle):**
+              - Multi-channel adding: Strict database-validated search (nonexistent users cannot be added; cannot add self), 8-character ID input, and ZXing QR code generator & scanner.
+              - Incoming invitations tab with instant Accept / Decline actions.
+              - Facebook friend suggestions with Add and Delete/Dismiss options.
+            - **Clean In-App Updates:** One-tap clean update button without changelog bloat.
+            - **100% App-Made Vector Drawables:** Zero generic emojis, zero stock icons—bespoke vector glyphs for StreakStake.
+            - **Minimal Dark Cinema Design:** Strict 2-color palette (#0A0A0F base, #12121A surface, and #DC2626 crimson accent).
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -14,15 +14,14 @@
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
-        <Button
+        <ImageView
             android:id="@+id/btnClose"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:background="@drawable/btn_outlined_hairline"
-            android:text="✕"
-            android:textColor="@color/text_primary"
-            android:textSize="14sp"
-            app:backgroundTint="@null" />
+            android:contentDescription="Close"
+            android:padding="10dp"
+            android:src="@drawable/ic_app_close" />
 
         <TextView
             android:layout_width="0dp"

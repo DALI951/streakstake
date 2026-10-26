@@ -2,15 +2,20 @@ package com.streakstake.app.models
 
 data class User(
     val id: String,
-    val name: String,
-    val email: String,
+    var name: String,
+    var email: String,
     var username: String = "",
+    val uniqueCode: String, // 8-character alphanumeric + symbols (e.g. K9#mX2!a)
+    val linkedProviders: MutableList<String> = mutableListOf("google"),
+    var googleId: String? = null,
+    var facebookId: String? = null,
     var totalXp: Int = 500,
     var currentStreak: Int = 0,
     var bestStreak: Int = 0,
     var challengesCompleted: Int = 0,
     var challengesFailed: Int = 0,
-    val friendsList: MutableList<String> = mutableListOf()
+    val friendsList: MutableList<String> = mutableListOf(),
+    val dismissedSuggestions: MutableList<String> = mutableListOf()
 )
 
 object StakeStatus {
@@ -24,6 +29,7 @@ data class Stake(
     val id: String,
     val creatorId: String = "",
     val creatorName: String = "",
+    val creatorHandle: String = "",
     val title: String,
     val targetMeters: Int,
     var currentMeters: Int = 0,
@@ -31,6 +37,7 @@ data class Stake(
     val stakeXp: Int,
     val multiplier: Double = 1.5,
     var status: String = StakeStatus.ACTIVE,
+    val deadlineMillis: Long = System.currentTimeMillis() + (4 * 3600 * 1000L), // Default 4 hours countdown
     var proofPhotoPath: String? = null,
     var proofNote: String? = null,
     var verifiedBy: String? = null,
@@ -47,6 +54,35 @@ data class Stake(
         get() = status == StakeStatus.BURNED
 }
 
+data class FriendRequest(
+    val id: String,
+    val fromUserId: String,
+    val fromUserName: String,
+    val fromUserHandle: String,
+    val toUserId: String,
+    var status: String = "PENDING", // PENDING, ACCEPTED, DECLINED
+    val createdAt: Long = System.currentTimeMillis()
+)
+
+data class AppNotification(
+    val id: String,
+    val userId: String,
+    val title: String,
+    val message: String,
+    val timestamp: Long = System.currentTimeMillis(),
+    var isRead: Boolean = false
+)
+
+data class Friend(
+    val id: String,
+    val name: String,
+    val username: String,
+    val uniqueCode: String,
+    var totalXp: Int,
+    var streak: Int,
+    var isOnline: Boolean = true
+)
+
 data class SocialFeedItem(
     val id: String,
     val userId: String,
@@ -55,15 +91,6 @@ data class SocialFeedItem(
     val description: String,
     val xpAmount: Int,
     val timestamp: Long = System.currentTimeMillis()
-)
-
-data class Friend(
-    val id: String,
-    val name: String,
-    val username: String,
-    var totalXp: Int,
-    var streak: Int,
-    var isOnline: Boolean = true
 )
 
 data class GitHubRelease(

@@ -1,0 +1,16 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- StreakStake Flame Crest: Custom Geometric Staking Emblem -->
+    <path
+        android:fillColor="@color/accent"
+        android:pathData="M12,2L14.5,8.5L21,9.5L16.2,14.2L17.5,21L12,17.8L6.5,21L7.8,14.2L3,9.5L9.5,8.5L12,2Z" />
+    <path
+        android:fillColor="@color/bg_base"
+        android:pathData="M12,7L13.3,10.5L17,11L14.2,13.7L15,17.5L12,15.7L9,17.5L9.8,13.7L7,11L10.7,10.5L12,7Z" />
+    <path
+        android:fillColor="@color/accent_light"
+        android:pathData="M12,10L12.8,12.2L15,12.5L13.3,14.2L13.8,16.5L12,15.4L10.2,16.5L10.7,14.2L9,12.5L11.2,12.2L12,10Z" />
+</vector>

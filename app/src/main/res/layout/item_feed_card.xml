@@ -13,12 +13,12 @@
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
-        <TextView
+        <ImageView
             android:id="@+id/tvFeedIcon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="🔥"
-            android:textSize="14sp" />
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:contentDescription="Streak"
+            android:src="@drawable/ic_app_streak" />
 
         <TextView
             android:id="@+id/tvFeedUser"

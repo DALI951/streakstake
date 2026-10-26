@@ -12,22 +12,21 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Top Header with Back Button -->
+        <!-- Top Header with Vector Back Button -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
-            <Button
+            <ImageView
                 android:id="@+id/btnBackSettings"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:background="@drawable/btn_outlined_hairline"
-                android:text="←"
-                android:textColor="@color/text_primary"
-                android:textSize="18sp"
-                app:backgroundTint="@null" />
+                android:contentDescription="Back"
+                android:padding="10dp"
+                android:src="@drawable/ic_app_back" />
 
             <TextView
                 android:layout_width="0dp"
@@ -36,12 +35,12 @@
                 android:layout_weight="1"
                 android:fontFamily="sans-serif-bold"
                 android:letterSpacing="-0.02"
-                android:text="Profile &amp; Settings"
+                android:text="Settings &amp; Account"
                 android:textColor="@color/text_primary"
                 android:textSize="20sp" />
         </LinearLayout>
 
-        <!-- Identity Card (From Calisthenics ProfileScreen) -->
+        <!-- SECTION 1: IDENTITY & 8-CHARACTER CODE -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -93,138 +92,209 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- Level / XP progress bar -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginVertical="14dp"
+                android:background="@color/hairline" />
+
+            <!-- Unique 8-Character ID Card with Copy Button -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:letterSpacing="0.04"
+                android:text="YOUR UNIQUE ACCOUNT ID"
+                android:textColor="@color/text_secondary"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="46dp"
+                android:layout_marginTop="6dp"
+                android:background="@drawable/bg_card_highlight"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="12dp">
+
+                <TextView
+                    android:id="@+id/tvSettings8CharId"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:fontFamily="monospace"
+                    android:letterSpacing="0.1"
+                    android:text="K9#mX2!a"
+                    android:textColor="@color/accent_light"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <Button
+                    android:id="@+id/btnCopySettingsId"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:background="@drawable/btn_outlined_hairline"
+                    android:drawableStart="@drawable/ic_app_copy"
+                    android:drawablePadding="6dp"
+                    android:paddingHorizontal="10dp"
+                    android:text="Copy"
+                    android:textAllCaps="false"
+                    android:textColor="@color/text_primary"
+                    android:textSize="11sp" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Use this ID to connect directly with friends or restore your account."
+                android:textColor="@color/text_disabled"
+                android:textSize="11sp" />
+        </LinearLayout>
+
+        <!-- SECTION 2: MULTI-PROVIDER ACCOUNT LINKING -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="22dp"
+            android:fontFamily="sans-serif-bold"
+            android:text="Linked Accounts &amp; Backup"
+            android:textColor="@color/text_primary"
+            android:textSize="15sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_card_dark"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Google Account Row -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:orientation="vertical">
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:contentDescription="Google"
+                    android:src="@drawable/ic_app_google" />
 
                 <LinearLayout
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
 
                     <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:fontFamily="sans-serif-bold"
-                        android:text="Level 1 Athlete"
-                        android:textColor="@color/text_primary"
-                        android:textSize="12sp" />
-
-                    <TextView
-                        android:id="@+id/tvProfileXp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="500 XP"
-                        android:textColor="@color/accent_light"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
+                        android:fontFamily="sans-serif-bold"
+                        android:text="Google Account"
+                        android:textColor="@color/text_primary"
+                        android:textSize="13sp" />
+
+                    <TextView
+                        android:id="@+id/tvGoogleAccountStatus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Connected"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="11sp" />
                 </LinearLayout>
 
-                <ProgressBar
-                    android:id="@+id/pbProfileLevel"
-                    style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-                    android:layout_width="match_parent"
-                    android:layout_height="6dp"
-                    android:layout_marginTop="8dp"
-                    android:max="1000"
-                    android:progress="500"
-                    android:progressTint="@color/accent" />
+                <TextView
+                    android:id="@+id/tvGoogleLinkedBadge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_pill_chip_active"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="2dp"
+                    android:text="LINKED"
+                    android:textColor="@color/on_accent"
+                    android:textSize="10sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginVertical="12dp"
+                android:background="@color/hairline" />
+
+            <!-- Facebook Account Row & Linking -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:contentDescription="Facebook"
+                    android:src="@drawable/ic_app_facebook" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif-bold"
+                        android:text="Facebook Account"
+                        android:textColor="@color/text_primary"
+                        android:textSize="13sp" />
+
+                    <TextView
+                        android:id="@+id/tvFacebookAccountStatus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Enables friend suggestions &amp; backup"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="11sp" />
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/btnLinkFacebook"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:background="@drawable/btn_accent_primary"
+                    android:fontFamily="sans-serif-bold"
+                    android:paddingHorizontal="10dp"
+                    android:text="Link Facebook"
+                    android:textAllCaps="false"
+                    android:textColor="@color/on_accent"
+                    android:textSize="11sp" />
             </LinearLayout>
 
         </LinearLayout>
 
-        <!-- SECTION 1: ACCOUNT CONFIGURATION -->
+        <!-- SECTION 3: APP UPDATES (CLEAN: ZERO LOGS, ONLY UPDATE BUTTON) -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="22dp"
             android:fontFamily="sans-serif-bold"
-            android:text="Account Details"
+            android:text="App Updates"
             android:textColor="@color/text_primary"
-            android:textSize="16sp" />
+            android:textSize="15sp" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="8dp"
             android:background="@drawable/bg_card_dark"
             android:orientation="vertical"
-            android:padding="18dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Display Name"
-                android:textColor="@color/text_secondary"
-                android:textSize="12sp" />
-
-            <EditText
-                android:id="@+id/etSettingsName"
-                android:layout_width="match_parent"
-                android:layout_height="46dp"
-                android:layout_marginTop="6dp"
-                android:background="@drawable/bg_input_field"
-                android:hint="Athlete Name"
-                android:paddingHorizontal="14dp"
-                android:textColor="@color/text_primary"
-                android:textColorHint="@color/text_disabled"
-                android:textSize="13sp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                android:text="Username Handle"
-                android:textColor="@color/text_secondary"
-                android:textSize="12sp" />
-
-            <EditText
-                android:id="@+id/etSettingsHandle"
-                android:layout_width="match_parent"
-                android:layout_height="46dp"
-                android:layout_marginTop="6dp"
-                android:background="@drawable/bg_input_field"
-                android:hint="@username"
-                android:paddingHorizontal="14dp"
-                android:textColor="@color/text_primary"
-                android:textColorHint="@color/text_disabled"
-                android:textSize="13sp" />
-
-            <Button
-                android:id="@+id/btnSaveAccount"
-                android:layout_width="match_parent"
-                android:layout_height="44dp"
-                android:layout_marginTop="16dp"
-                android:background="@drawable/btn_accent_primary"
-                android:fontFamily="sans-serif-bold"
-                android:text="Save Changes"
-                android:textAllCaps="false"
-                android:textColor="@color/on_accent"
-                android:textSize="13sp"
-                app:backgroundTint="@null" />
-        </LinearLayout>
-
-        <!-- SECTION 2: GITHUB IN-APP UPDATES -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:fontFamily="sans-serif-bold"
-            android:text="GitHub In-App Updates"
-            android:textColor="@color/text_primary"
-            android:textSize="16sp" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/bg_card_dark"
-            android:orientation="vertical"
-            android:padding="18dp">
+            android:padding="16dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -238,7 +308,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:fontFamily="sans-serif-bold"
-                    android:text="Installed Version: v2.3.0"
+                    android:text="StreakStake v2.4.0"
                     android:textColor="@color/text_primary"
                     android:textSize="14sp" />
 
@@ -249,160 +319,94 @@
                     android:background="@drawable/bg_pill_chip"
                     android:paddingHorizontal="10dp"
                     android:paddingVertical="3dp"
-                    android:text="UP TO DATE"
-                    android:textColor="@color/accent_light"
+                    android:text="CHECKING..."
+                    android:textColor="@color/text_secondary"
                     android:textSize="10sp"
                     android:textStyle="bold" />
             </LinearLayout>
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:lineSpacingExtra="2dp"
-                android:text="StreakStake compiles via GitHub Actions. Tapping below checks for the latest APK release and installs it directly."
-                android:textColor="@color/text_secondary"
-                android:textSize="13sp" />
-
+            <!-- Single Clean Update Button: One Tap Downloads & Installs -->
             <Button
                 android:id="@+id/btnCheckUpdatesSettings"
                 android:layout_width="match_parent"
                 android:layout_height="44dp"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="14dp"
                 android:background="@drawable/btn_accent_primary"
                 android:fontFamily="sans-serif-bold"
-                android:text="Check for Updates Now"
+                android:text="Update App"
                 android:textAllCaps="false"
                 android:textColor="@color/on_accent"
                 android:textSize="13sp"
                 app:backgroundTint="@null" />
+        </LinearLayout>
 
-            <Button
-                android:id="@+id/btnOpenGitHub"
+        <!-- SECTION 4: IN-APP NOTIFICATIONS -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="22dp"
+            android:fontFamily="sans-serif-bold"
+            android:text="Recent Notifications"
+            android:textColor="@color/text_primary"
+            android:textSize="15sp" />
+
+        <LinearLayout
+            android:id="@+id/containerNotifications"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_card_dark"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/tvNoNotifications"
                 android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:layout_marginTop="8dp"
-                android:background="@android:color/transparent"
-                android:text="View GitHub Releases ↗"
-                android:textAllCaps="false"
+                android:layout_height="wrap_content"
+                android:text="No notifications yet. You will be notified when friends invite you or accept invitations."
                 android:textColor="@color/text_secondary"
                 android:textSize="12sp" />
         </LinearLayout>
 
-        <!-- SECTION 3: SENSORS & HARDWARE DETECTION -->
+        <!-- SECTION 5: ACCOUNT DISCONNECT & SIGN OUT -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="22dp"
             android:fontFamily="sans-serif-bold"
-            android:text="Sensors &amp; Motion"
+            android:text="Account Session"
             android:textColor="@color/text_primary"
-            android:textSize="16sp" />
+            android:textSize="15sp" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/bg_card_dark"
-            android:orientation="vertical"
-            android:padding="18dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="GPS Distance Tracking"
-                    android:textColor="@color/text_primary"
-                    android:textSize="14sp" />
-
-                <androidx.appcompat.widget.SwitchCompat
-                    android:id="@+id/switchGps"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="true"
-                    app:thumbTint="@color/accent"
-                    app:trackTint="@color/hairline" />
-            </LinearLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginVertical="12dp"
-                android:background="@color/hairline" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Haptic Vibration Feedback"
-                    android:textColor="@color/text_primary"
-                    android:textSize="14sp" />
-
-                <androidx.appcompat.widget.SwitchCompat
-                    android:id="@+id/switchHaptic"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="true"
-                    app:thumbTint="@color/accent"
-                    app:trackTint="@color/hairline" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- SECTION 4: DATA RESET & LOGOUT (Danger section) -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:fontFamily="sans-serif-bold"
-            android:text="Account &amp; Data"
-            android:textColor="@color/text_primary"
-            android:textSize="16sp" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="8dp"
             android:layout_marginBottom="32dp"
             android:background="@drawable/bg_card_dark"
             android:orientation="vertical"
-            android:padding="18dp">
-
-            <Button
-                android:id="@+id/btnResetData"
-                android:layout_width="match_parent"
-                android:layout_height="44dp"
-                android:background="@drawable/btn_outlined_hairline"
-                android:fontFamily="sans-serif-medium"
-                android:text="Reset Stakes &amp; Restore 500 XP"
-                android:textAllCaps="false"
-                android:textColor="@color/text_primary"
-                android:textSize="13sp"
-                app:backgroundTint="@null" />
+            android:padding="16dp">
 
             <Button
                 android:id="@+id/btnSignOutSettings"
                 android:layout_width="match_parent"
                 android:layout_height="44dp"
-                android:layout_marginTop="10dp"
                 android:background="@drawable/btn_outlined_hairline"
                 android:fontFamily="sans-serif-bold"
-                android:text="Sign Out"
+                android:text="Sign Out / Disconnect"
                 android:textAllCaps="false"
                 android:textColor="@color/danger"
                 android:textSize="13sp"
                 app:backgroundTint="@null" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:gravity="center"
+                android:text="You can restore your full account, stakes, and XP anytime."
+                android:textColor="@color/text_disabled"
+                android:textSize="11sp" />
         </LinearLayout>
 
     </LinearLayout>

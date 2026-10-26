@@ -386,4 +386,10 @@ class WalkTrackerActivity : AppCompatActivity(), SensorEventListener, LocationLi
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
     override fun onProviderEnabled(provider: String) {}
     override fun onProviderDisabled(provider: String) {}
+
+    companion object {
+        const val EXTRA_STAKE_ID = "STAKE_ID"
+        const val EXTRA_TARGET_METERS = "TARGET_METERS"
+        const val EXTRA_STAKE_XP = "STAKE_XP"
+    }
 }

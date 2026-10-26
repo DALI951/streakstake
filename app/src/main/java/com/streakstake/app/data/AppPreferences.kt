@@ -11,9 +11,10 @@ import com.streakstake.app.models.StakeStatus
 import com.streakstake.app.models.User
 import java.util.UUID
 
-class AppPreferences(context: Context) {
+class AppPreferences(private val context: Context) {
     private val prefs: SharedPreferences = context.getSharedPreferences("streakstake_prefs", Context.MODE_PRIVATE)
     private val gson = Gson()
+    private val db get() = AppDatabase.getInstance(context)
 
     companion object {
         private const val KEY_CURRENT_USER = "current_user"
@@ -29,17 +30,22 @@ class AppPreferences(context: Context) {
     // --- User Session ---
     fun getCurrentUser(): User? {
         val json = prefs.getString(KEY_CURRENT_USER, null) ?: return null
-        return try {
+        val cached = try {
             gson.fromJson(json, User::class.java)
         } catch (e: Exception) {
             null
-        }
+        } ?: return null
+
+        // Sync with central database
+        val synced = db.findUserById(cached.id)
+        return synced ?: cached
     }
 
     fun saveCurrentUser(user: User?) {
         if (user == null) {
             prefs.edit().remove(KEY_CURRENT_USER).apply()
         } else {
+            db.saveOrUpdateUser(user)
             prefs.edit().putString(KEY_CURRENT_USER, gson.toJson(user)).apply()
         }
     }
@@ -101,18 +107,7 @@ class AppPreferences(context: Context) {
         val current = getStakes()
         current.add(0, stake)
         saveStakes(current)
-
-        // Post to Social Feed
-        addSocialFeedItem(
-            SocialFeedItem(
-                id = "feed_" + UUID.randomUUID().toString().take(8),
-                userId = stake.creatorId,
-                userName = stake.creatorName.ifEmpty { "Challenger" },
-                actionType = "STAKE_LOCKED",
-                description = "Locked ${stake.stakeXp} XP on '${stake.title}' (${stake.targetMeters}m target)",
-                xpAmount = stake.stakeXp
-            )
-        )
+        db.addOrUpdateStake(stake)
     }
 
     fun updateStake(stake: Stake) {
@@ -121,6 +116,7 @@ class AppPreferences(context: Context) {
         if (index != -1) {
             current[index] = stake
             saveStakes(current)
+            db.addOrUpdateStake(stake)
         }
     }
 

@@ -117,14 +117,14 @@ class GitHubUpdateManager(private val context: Context) {
     fun showUpdateDialog(activity: Activity, release: GitHubRelease, asset: GitHubAsset) {
         val dialogView = LayoutInflater.from(activity).inflate(R.layout.dialog_update_available, null)
         val tvTitle = dialogView.findViewById<TextView>(R.id.tvUpdateTitle)
-        val tvNotes = dialogView.findViewById<TextView>(R.id.tvUpdateNotes)
+        val tvSubtitle = dialogView.findViewById<TextView>(R.id.tvUpdateSubtitle)
         val progressBar = dialogView.findViewById<ProgressBar>(R.id.pbDownloadProgress)
         val tvProgress = dialogView.findViewById<TextView>(R.id.tvProgressPercent)
         val btnInstall = dialogView.findViewById<Button>(R.id.btnDownloadUpdate)
         val btnDismiss = dialogView.findViewById<Button>(R.id.btnDismissUpdate)
 
-        tvTitle.text = "New Release ${release.tag_name}"
-        tvNotes.text = if (!release.body.isNullOrBlank()) release.body else "Performance enhancements and peer staking stability improvements."
+        tvTitle.text = "Update StreakStake"
+        tvSubtitle.text = "Version ${release.tag_name} is ready to install."
 
         val dialog = AlertDialog.Builder(activity)
             .setView(dialogView)
